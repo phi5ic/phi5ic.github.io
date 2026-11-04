@@ -1,4 +1,48 @@
-title: phi5ic (Aravind Anilraj)
-description: Technical writing on storage systems, distributed computing and other fun stuff.
+# Site Settings
+title: "phi5ic (Aravind Anilraj)"
+name: "Aravind Anilraj"
+description: "Technical writing on storage systems, distributed computing, and other fun stuff"
+url: "https://phi5ic.github.io"
+baseurl: ""
+
+# Theme settings
 remote_theme: "mmistakes/minimal-mistakes@4.28.0"
-minimal_mistakes_skin: "catppuchin_mocha"
+minimal_mistakes_skin: "catppuccin_mocha"
+
+# plugins
+plugins:
+  - jekyll-include-cache
+
+# Site Author (for sidebar)
+author:
+  name: "phi5ic (Aravind Anilraj)"
+  bio: "Building Nifsi, a distributed OS layer, and a Linux contributor."
+  links:
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/phi5ic"
+
+# Pagination
+paginate: 5
+paginate_path: "/page:num/"
+
+# Exclude from processing
+exclude:
+  - bin
+  - vendor
+  - .bundle
+  - Gemfile
+  - Gemfile.lock
+
+# Defaults for posts (optional but recommended)
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      author_profile: true
+      read_time: true
+      comments: false
+      share: true
+      related: true
