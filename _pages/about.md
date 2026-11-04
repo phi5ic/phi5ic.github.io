@@ -17,6 +17,8 @@ I'm **Aravind Anilraj** (`phi5ic`). I'm a systems engineer and Linux contributor
 ### Projects
 
 - **[Nifsi](https://github.com/phi5ic/Nifsi):** A distributed userspace OS layer on Linux.
+- **[StabiSense](https://github.com/phi5ic/StabiSense):** Myosa 5.0 finalist project, dynamically stabilizes chipsets during manufacturing, presented in IEEE Thailand Biosensors Conference (2026).
+- **[Qgis-Simulation](https://github.com/phi5ic/Qgis-Simulation):** a high-performance spatial analysis tool designed to identify water pipeline breaches by combining Machine Learning, Dijkstra’s Pathfinding, and Copernicus SAR Imagery. Won first place at the Flowvison Hackathon under Brahma26 (ASIET).
 - **Technical Writing:** Rigorous benchmarks, architecture postmortems, and engineering deep dives.
 
 ### Connect
@@ -24,3 +26,4 @@ I'm **Aravind Anilraj** (`phi5ic`). I'm a systems engineer and Linux contributor
 Feel free to explore my repositories or get in touch:
 - **GitHub:** [@phi5ic](https://github.com/phi5ic)
 - **Email:** [aravindanilraj0702@gmail.com](mailto:aravindanilraj0702@gmail.com)
+- **Linkedin:** [Aravind Anilraj] (https://www.linkedin.com/in/aravind-anilraj/) 
