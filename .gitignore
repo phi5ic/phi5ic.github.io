@@ -1,3 +1,9 @@
+# Node & Astro
+node_modules/
+dist/
+.astro/
+
+# Legacy Jekyll
 _site/
 .sass-cache/
 .jekyll-cache/
@@ -5,3 +11,8 @@ _site/
 vendor/
 .bundle/
 bin/
+
+# OS / Editor
+.DS_Store
+*.log
+.gh-pages-deploy/

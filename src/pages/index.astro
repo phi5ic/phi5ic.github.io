@@ -1,0 +1,227 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+const featuredPost = posts[0];
+
+const projects = [
+  {
+    name: 'Nifsi',
+    tag: 'Rust / Systems',
+    desc: 'An open-source distributed userspace OS layer on Linux. Features HADR self-healing storage, slice-level repair, and fast consensus.',
+    url: 'https://github.com/phi5ic/Nifsi',
+    accent: '#7dcfff',
+  },
+  {
+    name: 'StabiSense',
+    tag: 'IEEE Thailand 2026 Finalist',
+    desc: 'Dynamic stabilization for chipsets during high-precision manufacturing. Presented at IEEE Thailand Biosensors Conference.',
+    url: 'https://github.com/phi5ic/StabiSense',
+    accent: '#bb9af7',
+  },
+  {
+    name: 'Qgis-Simulation',
+    tag: '1st Place Hackathon Winner',
+    desc: 'Spatial ML pipeline analysis combining Copernicus SAR radar satellite imagery and Dijkstra pathfinding for water pipeline breaches.',
+    url: 'https://github.com/phi5ic/Qgis-Simulation',
+    accent: '#9ece6a',
+  },
+];
+
+const pillars = [
+  {
+    title: 'Erasure Coding & Array Codes',
+    detail: 'EVENODD, RDP, STAR, Cauchy Reed-Solomon, slice-level homology repair, and cut-set bound minimization.',
+    icon: '⚡',
+  },
+  {
+    title: 'Distributed Consensus & Meshes',
+    detail: 'Multi-node virtual consensus, localized quorum management, delta journaling, and zero-downtime node recovery.',
+    icon: '🌐',
+  },
+  {
+    title: 'Kernel & Computer Arithmetic',
+    detail: 'Linux kernel contributions, SIMD hot paths, carry-less multiplication (PCLMULQDQ), and finite-field GF(2ᵐ) math.',
+    icon: '⚙️',
+  },
+];
+---
+
+<BaseLayout>
+  <div class="max-w-4xl mx-auto py-8 sm:py-16 space-y-20 sm:space-y-28">
+    <!-- Hero Section (Apple Aesthetic) -->
+    <section class="space-y-6 pt-4">
+      <!-- Live Status Pill -->
+      <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-medium glass-panel text-[#c0caf5]">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#9ece6a] opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-[#9ece6a]"></span>
+        </span>
+        <span>Building <a href="https://github.com/phi5ic/Nifsi" target="_blank" class="text-[#7dcfff] hover:underline font-bold">Nifsi</a> &bull; Linux Contributor</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.1] max-w-3xl">
+        Systems, Storage &amp; <br />
+        <span class="gradient-accent">Distributed Computing.</span>
+      </h1>
+
+      <!-- Intro Paragraph -->
+      <p class="text-lg sm:text-xl text-[#9aa5ce] leading-relaxed max-w-2xl font-normal">
+        I’m <strong class="text-white">Aravind Anilraj</strong> (known as <code class="text-[#7dcfff] font-mono">phi5ic</code>). I contribute Linux kernel patches and build <strong class="text-white">Nifsi</strong>, a distributed userspace operating system layer in Rust. I write down what I learn about storage theory, erasure coding, consensus, and systems internals while building things.
+      </p>
+
+      <!-- Quick Action Pills -->
+      <div class="flex flex-wrap items-center gap-3 pt-2">
+        <a
+          href="/posts/"
+          class="px-5 py-2.5 rounded-full bg-white text-[#0f1017] font-semibold text-sm hover:bg-[#c0caf5] transition-all shadow-lg hover:shadow-white/10"
+        >
+          Read Deep Dives
+        </a>
+        <a
+          href="/about/"
+          class="px-5 py-2.5 rounded-full glass-panel hover:bg-white/10 text-white font-medium text-sm transition-all"
+        >
+          About &amp; Research
+        </a>
+        <a
+          href="https://github.com/phi5ic"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-4 py-2.5 rounded-full text-[#9aa5ce] hover:text-white font-mono text-sm transition-colors flex items-center gap-1.5"
+        >
+          GitHub &rarr;
+        </a>
+      </div>
+    </section>
+
+    <!-- Featured Post Spotlight -->
+    {featuredPost && (
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono uppercase tracking-widest text-[#7dcfff] font-bold">Featured Investigation</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#7dcfff]"></span>
+          </div>
+          <a href="/posts/" class="text-xs text-[#7aa2f7] hover:text-[#7dcfff] transition-colors font-medium">
+            All posts &rarr;
+          </a>
+        </div>
+
+        <a
+          href={`/posts/${featuredPost.id.replace(/\.mdx?$/, '')}/`}
+          class="glass-card block overflow-hidden group border border-white/10 hover:border-[#7aa2f7]/50"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 sm:p-8 items-center">
+            <div class="md:col-span-7 space-y-4">
+              <div class="flex flex-wrap items-center gap-2 text-xs font-mono text-[#565f89]">
+                <time datetime={featuredPost.data.date.toISOString()} class="text-[#7aa2f7]">
+                  {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(featuredPost.data.date)}
+                </time>
+                <span>&bull;</span>
+                <span class="text-[#9aa5ce]">12 min read</span>
+                <span>&bull;</span>
+                <span class="px-2 py-0.5 rounded bg-white/5 text-[#bb9af7] border border-white/5">
+                  Erasure Coding
+                </span>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white group-hover:text-[#7dcfff] transition-colors leading-snug">
+                {featuredPost.data.title}
+              </h2>
+
+              <p class="text-sm sm:text-base text-[#9aa5ce] line-clamp-3 leading-relaxed">
+                {featuredPost.data.excerpt}
+              </p>
+
+              <div class="inline-flex items-center gap-2 text-sm font-semibold text-[#7dcfff] pt-2">
+                <span>Read paper &amp; benchmarks</span>
+                <span class="transition-transform group-hover:translate-x-1">&rarr;</span>
+              </div>
+            </div>
+
+            <div class="md:col-span-5">
+              <div class="rounded-xl overflow-hidden border border-white/10 shadow-2xl bg-[#16161e] transform group-hover:scale-[1.02] transition-transform duration-300">
+                <div class="flex items-center gap-1.5 px-3 py-2 bg-[#1a1b26] border-b border-white/5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#f7768e]"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#e0af68]"></span>
+                  <span class="w-2.5 h-2.5 rounded-full bg-[#9ece6a]"></span>
+                  <span class="text-[10px] font-mono text-[#565f89] ml-2">nifsi cluster status</span>
+                </div>
+                <img
+                  src={featuredPost.data.header?.teaser || '/assets/images/posts/nifsi-cluster-status.jpg'}
+                  alt="Nifsi Cluster Status Output"
+                  class="w-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </a>
+      </section>
+    )}
+
+    <!-- Architecture Pillars -->
+    <section class="space-y-6">
+      <div class="border-b border-white/5 pb-4">
+        <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+          <span>Core Engineering Focus</span>
+        </h2>
+        <p class="text-sm text-[#565f89] mt-1">What I spend my time researching, building, and benchmarking.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {pillars.map((pillar) => (
+          <div class="glass-card p-6 flex flex-col justify-between">
+            <div>
+              <div class="text-2xl mb-3">{pillar.icon}</div>
+              <h3 class="text-base font-bold text-white mb-2">{pillar.title}</h3>
+              <p class="text-xs text-[#9aa5ce] leading-relaxed">{pillar.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Selected Projects Grid -->
+    <section class="space-y-6">
+      <div class="flex items-center justify-between border-b border-white/5 pb-4">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-bold text-white">Projects &amp; Contributions</h2>
+          <p class="text-sm text-[#565f89] mt-1">Systems implementations, research prototypes, and hackathon wins.</p>
+        </div>
+        <a href="/about/#projects" class="text-xs text-[#7aa2f7] hover:text-[#7dcfff] transition-colors font-medium">
+          View details &rarr;
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        {projects.map((proj) => (
+          <a
+            href={proj.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="glass-card p-6 flex flex-col justify-between group relative overflow-hidden"
+          >
+            <div>
+              <span class="text-[11px] font-mono font-medium text-[#7aa2f7] block mb-2">{proj.tag}</span>
+              <h3 class="text-lg font-bold text-white group-hover:text-[#7dcfff] transition-colors mb-2 flex items-center justify-between">
+                <span>{proj.name}</span>
+                <span class="text-xs text-[#565f89] group-hover:text-white transition-colors">&nearr;</span>
+              </h3>
+              <p class="text-xs text-[#9aa5ce] leading-relaxed mb-4">
+                {proj.desc}
+              </p>
+            </div>
+            <div class="text-xs font-mono text-[#565f89] group-hover:text-[#7aa2f7] transition-colors">
+              github.com/phi5ic/{proj.name}
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

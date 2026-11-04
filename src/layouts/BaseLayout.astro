@@ -1,0 +1,92 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title = 'Aravind Anilraj (phi5ic) — Systems, Storage & Distributed Computing',
+  description = 'Systems engineer building Nifsi, contributing to the Linux kernel, and writing deep dives on erasure coding, array codes, and OS internals.',
+  image = '/assets/images/posts/nifsi-cluster-status.jpg',
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO & Metadata -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(image, Astro.site)} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={new URL(image, Astro.site)} />
+
+    <!-- Astro View Transitions (Instant App Morphing) -->
+    <ClientRouter />
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <Header />
+    <main class="flex-grow pt-24 sm:pt-28 px-4 sm:px-6">
+      <slot />
+    </main>
+    <Footer />
+
+    <!-- Code Block Copy Interaction -->
+    <script>
+      function setupCodeCopy() {
+        document.querySelectorAll('.prose-tokyo pre').forEach((pre) => {
+          if (pre.querySelector('.copy-btn')) return;
+          const button = document.createElement('button');
+          button.className = 'copy-btn absolute top-3 right-3 px-2.5 py-1 rounded-md bg-white/10 hover:bg-white/20 text-[11px] font-mono text-[#9aa5ce] hover:text-white transition-all opacity-70 hover:opacity-100 select-none';
+          button.textContent = 'Copy';
+          button.setAttribute('aria-label', 'Copy code snippet');
+          button.addEventListener('click', async () => {
+            const code = pre.querySelector('code')?.innerText || pre.innerText;
+            try {
+              await navigator.clipboard.writeText(code);
+              button.textContent = 'Copied!';
+              button.style.color = '#9ece6a';
+              setTimeout(() => {
+                button.textContent = 'Copy';
+                button.style.color = '';
+              }, 2000);
+            } catch (err) {
+              button.textContent = 'Failed';
+            }
+          });
+          pre.classList.add('relative');
+          pre.appendChild(button);
+        });
+      }
+
+      setupCodeCopy();
+      document.addEventListener('astro:page-load', setupCodeCopy);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://phi5ic.github.io/sitemap.xml
