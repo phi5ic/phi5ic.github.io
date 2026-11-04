@@ -2,6 +2,8 @@
 title: "What I Learned Trying to Beat XOR"
 date: 2026-11-04
 excerpt: "Can XOR be beaten in erasure-coded storage? An investigation into scalar vs array codes, slice-level repair, and benchmark results comparing Sliced HADR-v2 against monolithic XOR."
+header:
+  teaser: /assets/images/posts/nifsi-cluster-status.jpg
 categories:
   - storage
   - coding-theory
@@ -70,7 +72,23 @@ My current design direction has four parts. **I want to be explicit about status
 
 **1. Encoding (partially implemented).** Start with a well-tested binary array code for the required failure tolerance and optimize the implementation before considering a custom construction. Measure throughput, CPU cycles per byte, and memory traffic separately. The goal is to know whether encoding is actually the bottleneck on the target hardware.
 
-**2. Repair (implemented prototype — the centerpiece of the next phase).** Investigate **slice-level repair**: dividing each stored fragment into independently addressable slices (4 KB sub-packets in my prototype) and reconstructing only the slices actually needed, rather than whole fragments. The prototype uses **horizontal and diagonal parity over 4 KB slices**:
+**2. Repair (implemented prototype — the centerpiece of the next phase).** Investigate **slice-level repair**: dividing each stored fragment into independently addressable slices (4 KB sub-packets in my prototype) and reconstructing only the slices actually needed, rather than whole fragments. 
+
+In the Nifsi storage engine prototype, files are tracked as structured strands composed of discrete 4 KB slice cohorts:
+
+<figure>
+  <img src="/assets/images/posts/nifsi-inspect-strand.jpg" alt="Nifsi file strand inspection terminal output">
+  <figcaption>Inspecting file strand integrity and 4 KB slice allocation using <code>nifsi inspect</code>.</figcaption>
+</figure>
+
+Each sub-packet slice can be queried and addressed individually with left and right arm boundaries:
+
+<figure>
+  <img src="/assets/images/posts/nifsi-slice-query.jpg" alt="Nifsi sub-packet slice query terminal output">
+  <figcaption>Querying sub-packet slices within a chunk using <code>nifsi slice-query</code>.</figcaption>
+</figure>
+
+The prototype uses **horizontal and diagonal parity over 4 KB slices**:
 
 $$
 P_h[s] = \bigoplus_{i=0}^{k-1} D_i[s]
@@ -81,6 +99,11 @@ P_d[s] = \bigoplus_{i=0}^{k-1} D_i[(s + i) \bmod M]
 $$
 
 This is a standard diagonal-parity array-code construction — the same mathematical family as RDP and EVENODD — with the twist that parity is computed at slice granularity. When a slice is corrupted, the repair path locates it via a Merkle path, reconstructs it from the diagonal parity and the other slices, and writes it back. I've been calling the guided repair path "CRISPR/Cas homology repair" as a metaphor for locating-and-reconstructing a specific slice — it is not a literal biological mechanism, and the underlying code is standard array-code decoding.
+
+<figure>
+  <img src="/assets/images/posts/nifsi-crispr-repair-slice.jpg" alt="Nifsi slice repair execution showing bit-for-bit reconstruction">
+  <figcaption>Targeted slice repair in action: repairing a single 4 KB slice bit-for-bit with <code>nifsi repair-slice</code> without touching the rest of the chunk.</figcaption>
+</figure>
 
 The hypothesis is that slice-level repair reduces bytes read from surviving nodes, bytes transferred over the network, and interference with foreground I/O during recovery. The benchmark below tests that hypothesis directly.
 
@@ -139,11 +162,18 @@ Delta journaling keeps WAF at 3.0× across the whole range. This is the stronges
 
 ### Distributed cluster test
 
-- 4-node virtual consensus mesh + 1 physical Raspberry Pi 3B+ (ARM Cortex-A53, Renesas RA4M1 crypto coprocessor).
-- 50 files ingested concurrently (22.11 MB total), 46/50 verified bit-for-bit on secondary mount.
-- 100 random partial writes in 0.016 s (6370 ops/sec), SHA-256 verified.
-- Ungraceful `SIGKILL` of `vnode3`: majority quorum (3/4) completed active write in 0.010 s. Resync succeeded.
-- Raspberry Pi: 5/5 files verified bit-for-bit across wireless mesh.
+To validate that slice repair and consensus work in a real distributed setup, I tested the prototype on a multi-node consensus mesh running the Nifsi userspace daemon alongside a physical Raspberry Pi 3B+ peer:
+
+<figure>
+  <img src="/assets/images/posts/nifsi-cluster-status.jpg" alt="Nifsi cluster status terminal output">
+  <figcaption>Live Nifsi cluster status showing consensus term leadership, active HADR chunks, and connected mesh peers.</figcaption>
+</figure>
+
+- **Cluster topology:** 4-node virtual consensus mesh + 1 physical Raspberry Pi 3B+ (ARM Cortex-A53, Renesas RA4M1 crypto coprocessor).
+- **Concurrency & verification:** 50 files ingested concurrently (22.11 MB total), 46/50 verified bit-for-bit on secondary mount.
+- **Throughput:** 100 random partial writes in 0.016 s (6370 ops/sec), SHA-256 verified.
+- **Fault injection:** Ungraceful `SIGKILL` of `vnode3`: majority quorum (3/4) completed active write in 0.010 s. Resync succeeded.
+- **Physical edge node:** Raspberry Pi: 5/5 files verified bit-for-bit across wireless mesh.
 
 ### Benchmark caveats
 
