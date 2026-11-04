@@ -27,13 +27,21 @@ paginate: 5
 paginate_path: "/page:num/"
 
 # Exclude from processing
+# _config.yml
 exclude:
-  - bin
-  - vendor
-  - .bundle
   - Gemfile
   - Gemfile.lock
-
+  - node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+  - .git
+  - .github
+  - _site
+  - README.md
+  - benchmark_results.json
+  - BENCHMARK_SCIENTIFIC_REPORT.md
+  - .txt
 # Defaults for posts (optional but recommended)
 defaults:
   - scope:
