@@ -18,77 +18,73 @@ use_math: true
 
 ## Why I started
 
-I think the best way to learn something is to go straight into the deep end with no prerequisite knowledge and see what happens. Most of my favorite learning came from that. I hate my college coursework and exams (which are insanely repetitive, boring, draggy) so I've found that putting myself through masochistic hardships is a much better learning pathway for someone like me.
+I think the best way to learn something is to go straight into the deep end with no prerequisite knowledge and see what happens. Most of my favorite learning came from that. I hate my college coursework and exams (which are insanely repetitive, boring, and draggy), so I've found that putting myself through masochistic technical hardships is a much better learning pathway for someone like me.
 
-I was working on my ongoing project Nifsi (a distributed userspace OS layer on top of Linux, currently targeting 10 to 50 nodes) when I hit the storage distribution problem. I needed something fast, versatile and able to recover chunks and that's when I found out about XOR and what it can do for erasure coding.
+I was working on my ongoing project, Nifsi (a distributed userspace OS layer on top of Linux, currently targeting 10 to 50 nodes), when I hit the storage distribution problem. I needed something fast, versatile, and able to recover chunks without crying when a node drops. That's when I ran into XOR and what it does for erasure coding.
 
-But my curiosity got the best of me:
+Naturally, instead of just using a normal library like a sane person, my curiosity got the best of me:
 
-> **Can XOR be beaten in erasure coded storage?**
+> **Can XOR be beaten in erasure-coded storage?**
 
-While it may sound narrow, I can assure you that its anything but. I did use LLMs (Gemini, DeepSeek, Qwen) to explore candidate approaches and locate relevant concepts, but treated their claims as hypotheses to verify against coding theory and implementation details as they do hallucinate and drift into science fiction if you let them.
+While that sounds like a quick afternoon Google search, I can assure you it's anything but. I used LLMs (Gemini, DeepSeek, Qwen) to bounce ideas around and locate papers, mostly treating their outputs as suspect hypotheses to verify against actual coding theory and code. Left unchecked, they will happily hallucinate and drift into pure science fiction.
 
 ## What XOR actually guarantees
 
-In erasure coded storage, XOR based MDS array codes such as Liberation, STAR, RAID6 family are everywhere. They are fast mainly because XOR maps directly to a cheap CPU instruction and vectorizes well. They are simple because decoding is linear algebra over GF(2).
+In erasure-coded storage, XOR-based MDS array codes like Liberation, STAR, and the RAID-6 family are everywhere. They are fast because XOR maps directly to dirt-cheap CPU instructions that vectorize well, and they are simple because decoding is just linear algebra over $GF(2)$.
 
-The important distinction, which, truth be told, I got wrong at first, is between **scalar codes** and **array codes**.
+The big distinction—which, truth be told, I got completely wrong at first—is between **scalar codes** and **array codes**.
 
-A scalar linear code over GF(2) with multiple data and parity symbols has essentially no useful MDS constructions, the binary alphabet is too restrictive, repetition an single parity codes being the trivial exceptions ,and thats the real reason why you dont see "binary Reed Solomon" used for storage.
+A scalar linear code over $GF(2)$ with multiple data and parity symbols has essentially no useful MDS constructions. The binary alphabet is just too small and restrictive (with trivial exceptions like repetition and single-parity codes). That is the real reason you don't see "binary Reed-Solomon" in the wild.
 
-Array codes work around this by changing the coding model. Each storage symbol is a **column of bits**, not a single field element. Parity equations operate on these vectors using XOR and carefully chosen shifts or permutations, that extra structures is what lets EVENODD, RDP, Liberation, and STAR provide 2 or 3 failure recovery using only XOR. It's not that XOR magically becomes MDS over GF(2), its that the coding model is entirely different.
+Array codes cheat this limit by changing the model. Each storage symbol is treated as a **column of bits**, not a single field element. Parity equations operate on these bit vectors using XOR alongside carefully chosen shifts and permutations. That extra structure is how EVENODD, RDP, Liberation, and STAR pull off 2- or 3-failure recovery using nothing but XOR. XOR doesn't magically become MDS over $GF(2)$; the coding model just changes the rules of the game.
 
-This distinction matters for the rest of the article, because its the reason XOR based storage codes exists at all.
+Understanding this matters for the rest of the post, because it's the only reason pure-XOR storage codes exist at all.
 
 ## What the alternatives actually change
 
-I wanted to know if the primitive itself could be replaced somehow, so I looked at serveral directions.
+Still stubbornly trying to see if the primitive itself could be replaced, I poked around a few different mathematical rabbit holes.
 
-**Complex and imaginary arithmetic.** Floating point complex arithmetic is not bit exact, and erasure recovery requires exact reconstruction and complex symbols also double storage (real+imaginary parts), and general complex multiplication is several real operations, not one instruction. This rules out complex arithemetic for the hot path.
+**Complex and imaginary arithmetic.** Floating-point complex math isn't bit-exact, and storage recovery doesn't forgive rounding errors. Even if you use fixed-point, complex symbols double your storage footprint (real + imaginary parts), and complex multiplication takes several operations instead of a single instruction. Dead on arrival for the hot path.
 
-**Finite field extension.** GF($2^m$) is the natural setting for Reed Solomon. The important correction to my earlier understanding: **addition over GF($2^m$) is still bitwise XOR.** There is no carry. The cost of a larger field shows up in **multiplication**, not addition, that multiplication can be implemented with lookup tables, carryless multiply instructions, or bit matrix XORs (Cauchy Reed Solomon), but it is still more work per byte than pure XOR array codes. So RS is not "worse because addition carries" its worse on the hot path due to the multiplication and decode cost.
+**Finite field extensions.** $GF(2^m)$ is home turf for Reed-Solomon. Here is a major correction to my own earlier misconception: **addition over $GF(2^m)$ is still just bitwise XOR.** There is no carry. The actual tax of a larger field shows up in **multiplication**. You can speed that up with lookup tables, carry-less multiply instructions (`PCLMULQDQ`), or bit-matrix XORs (Cauchy Reed-Solomon), but it is still way more work per byte than pure XOR array codes. RS isn't slower because addition carries; it's slower on the hot path because multiplication and matrix inversion hurt.
 
-**Non linear codes.** Some non linear constructions have efficient encoders or decoders; most don't, especially for the erasure patterns storage cares about. I didnt find one that credibly beat binary array codes for my workload. That's a statement about what I examined, not a theorem.
+**Non-linear codes.** A few non-linear constructions have decent encoders or decoders, but most don't, especially for the arbitrary erasure patterns storage systems care about. I didn't find anything here that credibly beat binary array codes for my workload (though that's just a statement about what I looked at, not a mathematical proof).
 
-A conversation with a researcher in formal verification, Akari Hayami, who I found on LinkedIn helped me seperate two questions I had been treating as one: whether XOR is *mathematically necessary* for chunk regeneration, and whether it's the *fastest practical choice* for a storage workload. Akari's framing: XOR is addition in characteristic 2, and most systems use it because it's fast, not because the algebra requires it. That reframed the problem. Now that meant that I wasnt fighting XOR, I was fighting the cost of addition and multiplication on the hot path.
+A conversation with Akari Hayami, a researcher in formal verification I found on LinkedIn, finally helped me untangle two questions I had been mashing together: whether XOR is *mathematically necessary* for chunk regeneration, and whether it's simply the *fastest practical choice* on modern silicon. Akari pointed out that XOR is just addition in characteristic 2, and systems use it because hardware loves it, not because the algebra forces you to. 
 
-## The real bottleneck is not one bottleneck
+That reframed everything. I wasn't fighting XOR anymore; I was fighting the cost of addition and multiplication on the hot path.
 
-The more useful conclusion from all this is that "beating XOR" was the wrong question. Erasure-coded storage has at least three separable cost problems, and the primitive is only one lever among several.
+## The real bottleneck isn't a single bottleneck
 
-**Encoding cost.** Depends on operation count, memory traffic, parallelism, and whether the workload is compute-bound or memory-bandwidth-bound. A code needing fewer XOR operations is not automatically faster if the CPU is already waiting on memory. In practice, for large stripes, encoding is often memory-bandwidth-bound, not instruction-bound.
+The biggest takeaway from bashing my head against the math is that "beating XOR" was a dumb question to begin with. Erasure-coded storage has at least three separate cost problems, and the CPU instruction is only one piece of the puzzle.
 
-**Decoding and repair cost.** Depends on which fragments survive, how many bytes must be read from each surviving node, how much must be transferred over the network, and how much must be reconstructed and written. A conventional XOR MDS code reads $k$ surviving chunks to repair one failure — that's a lot, and the cut-set bound says it doesn't have to be that much. Local reconstruction codes and regenerating codes trade some redundancy or field complexity for cheaper repair.
+**Encoding cost.** This comes down to instruction count, memory traffic, and cache locality. A fancy code that uses fewer XOR operations isn't going to run any faster if your CPU is just sitting there waiting on RAM. For large stripes, encoding is almost always memory-bandwidth-bound, not compute-bound.
 
-**Update and write amplification.** A small write to one data fragment may require updating several parity fragments. The cost depends on the code structure and whether writes can be batched into full stripes. Full-stripe writes avoid read-modify-write; partial-stripe writes don't.
+**Decoding and repair cost.** This depends on which fragments survive, how many bytes you have to pull off surviving disks, and how much garbage you have to shove across the network to fix one dead node. A standard XOR MDS code reads $k$ surviving chunks just to repair a single failure. That is brutal on network traffic, and the cut-set bound proves you don't actually have to read that much. Local Reconstruction Codes (LRCs) and regenerating codes trade a bit of extra storage or field complexity to make repairs much cheaper.
 
-These three costs are related but not interchangeable. A code that optimizes one can worsen another. That's the actual design space, and XOR is one choice inside it — usually the right one for encoding, usually not the best one for repair.
+**Update and write amplification.** If you overwrite a tiny piece of a data fragment, you also have to update every parity fragment that depends on it. Full-stripe writes dodge this, but partial-stripe updates force nasty read-modify-write cycles.
+
+You don't get a free lunch here. Tweaking a code to fix one of these usually makes another one worse. XOR is almost always the right tool for raw encoding speed, and almost never the whole answer for network repair.
 
 ## What this means for Nifsi
 
-The immediate consequence is that I don't need to replace XOR. I need to understand which cost dominates each operation and design accordingly.
+Once I accepted that I didn't need to reinvent binary addition, the actual goal became clear: keep XOR where it dominates, and fix the repair and update bottlenecks structurally.
 
-My current design direction has four parts. **I want to be explicit about status: only the first is partially implemented; the rest are hypotheses I intend to test.**
+My current design splits the problem into four parts. **To keep myself honest about what actually exists right now: Part 1 is partially built, Parts 2 and 3 are working prototypes, and Part 4 is still on the drawing board.**
 
-**1. Encoding (partially implemented).** Start with a well-tested binary array code for the required failure tolerance and optimize the implementation before considering a custom construction. Measure throughput, CPU cycles per byte, and memory traffic separately. The goal is to know whether encoding is actually the bottleneck on the target hardware.
+**1. Encoding (partially implemented).** Stick with a battle-tested binary array code for raw chunk encoding and optimize the memory layout before trying to be clever. I'm measuring throughput, CPU cycles per byte, and memory bandwidth separately to see where the hardware actually chokes.
 
-**2. Repair (implemented prototype — the centerpiece of the next phase).** Investigate **slice-level repair**: dividing each stored fragment into independently addressable slices (4 KB sub-packets in my prototype) and reconstructing only the slices actually needed, rather than whole fragments. 
-
-In the Nifsi storage engine prototype, files are tracked as structured strands composed of discrete 4 KB slice cohorts:
+**2. Repair (implemented prototype).** Instead of pulling entire multi-megabyte chunks across the network when something breaks, I built a prototype around **slice-level repair**. Every fragment is chopped into independently addressable 4 KB slices, using **horizontal and diagonal parity** across those slices:
 
 <figure>
   <img src="/assets/images/posts/nifsi-inspect-strand.jpg" alt="Nifsi file strand inspection terminal output">
   <figcaption>Inspecting file strand integrity and 4 KB slice allocation using <code>nifsi inspect</code>.</figcaption>
 </figure>
 
-Each sub-packet slice can be queried and addressed individually with left and right arm boundaries:
-
 <figure>
   <img src="/assets/images/posts/nifsi-slice-query.jpg" alt="Nifsi sub-packet slice query terminal output">
   <figcaption>Querying sub-packet slices within a chunk using <code>nifsi slice-query</code>.</figcaption>
 </figure>
-
-The prototype uses **horizontal and diagonal parity over 4 KB slices**:
 
 $$
 P_h[s] = \bigoplus_{i=0}^{k-1} D_i[s]
@@ -98,16 +94,14 @@ $$
 P_d[s] = \bigoplus_{i=0}^{k-1} D_i[(s + i) \bmod M]
 $$
 
-This is a standard diagonal-parity array-code construction — the same mathematical family as RDP and EVENODD — with the twist that parity is computed at slice granularity. When a slice is corrupted, the repair path locates it via a Merkle path, reconstructs it from the diagonal parity and the other slices, and writes it back. I've been calling the guided repair path "CRISPR/Cas homology repair" as a metaphor for locating-and-reconstructing a specific slice — it is not a literal biological mechanism, and the underlying code is standard array-code decoding.
+Mathematically, this is just standard diagonal array parity (same family as RDP and EVENODD), applied at 4 KB slice granularity. When a slice gets corrupted, the repair engine tracks it down via a Merkle tree, pulls only the required diagonal/horizontal slices, patches the 4 KB hole, and moves on. Internally I've been calling this guided lookup-and-patch flow "CRISPR/Cas homology repair" because I like the biological metaphor, though under the hood it's pure array-code math and Merkle trees.
 
 <figure>
   <img src="/assets/images/posts/nifsi-crispr-repair-slice.jpg" alt="Nifsi slice repair execution showing bit-for-bit reconstruction">
   <figcaption>Targeted slice repair in action: repairing a single 4 KB slice bit-for-bit with <code>nifsi repair-slice</code> without touching the rest of the chunk.</figcaption>
 </figure>
 
-The hypothesis is that slice-level repair reduces bytes read from surviving nodes, bytes transferred over the network, and interference with foreground I/O during recovery. The benchmark below tests that hypothesis directly.
-
-**3. Updates (implemented prototype).** Delta journaling: when a slice is updated, compute $\Delta = D_i^{\text{old}}[s] \oplus D_i^{\text{new}}[s]$ and apply it directly to parity:
+**3. Updates (implemented prototype).** To stop small writes from tanking the system, I used delta journaling. When a 4 KB slice changes, you XOR the old and new slice ($\Delta = D_i^{\text{old}}[s] \oplus D_i^{\text{new}}[s]$) and ship that delta straight to the parity nodes:
 
 $$
 P_h^{\text{new}}[s] = P_h^{\text{old}}[s] \oplus \Delta
@@ -117,15 +111,13 @@ $$
 P_d^{\text{new}}[(s - i) \bmod M] = P_d^{\text{old}}[(s - i) \bmod M] \oplus \Delta
 $$
 
-This avoids read-modify-write of surviving data slices. Benchmark result: **constant 3.0× write amplification**, independent of chunk size. Monolithic XOR peaks at 16,384× at 16 MB chunks.
+No reading surviving data nodes just to recalculate parity. In the benchmarks, this locked write amplification at a flat **3.0×**, regardless of how big the chunk gets. Monolithic XOR hit 16,384× on 16 MB chunks.
 
-**4. Integrity (separate project).** Detection of corruption, authentication of data, and Byzantine agreement on authoritative metadata are three different problems. I plan to start with per-fragment hashes and authenticated versioning, then decide separately whether the threat model requires a Byzantine fault-tolerant metadata protocol. Repair-bandwidth escalation (e.g., Clay MSR) and Byzantine fault tolerance (BFT) are also separate concerns — one is an erasure-code tradeoff, the other is a fault-model choice, and one does not trigger the other.
-
-The core idea is not "replace XOR." It's **confine XOR to where it's optimal, and solve the other problems with the right tools.**
+**4. Integrity (separate project).** Detecting bit-rot, authenticating versions, and reaching Byzantine consensus on metadata are three completely separate headaches. Right now I'm sticking to per-fragment hashes and version checks. I'm not touching BFT metadata unless the threat model actually forces my hand.
 
 ## What the benchmark showed
 
-I ran the prototype against two baselines: **Monolithic XOR** (whole-chunk parity, the current Nifsi-v1 storage engine) and **Reed–Solomon GF(2⁸) (k=4, p=2)** via a Cauchy Reed–Solomon implementation. Chunk sizes ranged from 64 KB to 16 MB. Here are the results that matter.
+I pitted the prototype (**Sliced HADR-v2**) against two baselines: **Monolithic XOR** (whole-chunk parity, which is what Nifsi-v1 currently runs) and **Cauchy Reed–Solomon** over $GF(2^8)$ with $k=4, p=2$. Chunk sizes scaled from 64 KB up to 16 MB.
 
 ### Repair network transfer
 
@@ -136,7 +128,7 @@ I ran the prototype against two baselines: **Monolithic XOR** (whole-chunk parit
 | 1 MB | 4096 KB | **16 KB** | 4096 KB |
 | 16 MB | 65536 KB | **16 KB** | 65536 KB |
 
-Sliced HADR-v2's repair transfer is **constant at 16 KB** — that's one 4 KB slice plus framing. Monolithic XOR and RS scale linearly with chunk size. At 16 MB chunks, Sliced HADR-v2 transfers **1/4096th** of what the monolithic baseline transfers. The reason is structural: repairing one 4 KB slice instead of one 16 MB chunk.
+Sliced HADR-v2 sits at a flat **16 KB** across the board—just the 4 KB slices needed plus packet framing. Monolithic XOR and RS scale linearly and painfully with chunk size. At 16 MB, the sliced prototype moves **1/4096th** of the data over the wire because it refuses to rebuild the whole 16 MB block for a localized fault.
 
 ### Write amplification
 
@@ -147,9 +139,9 @@ Sliced HADR-v2's repair transfer is **constant at 16 KB** — that's one 4 KB sl
 | 1 MB | 1024× | **3×** | 1536× |
 | 16 MB | 16384× | **3×** | 24576× |
 
-Delta journaling keeps WAF at 3.0× across the whole range. This is the strongest result in the benchmark: it is structural, not a tuning artifact.
+Delta journaling holds write amplification at 3.0× no matter how huge the underlying chunk is. There's no magic tuning here; it's just the math of updating a 4 KB delta instead of rewriting an entire block.
 
-### The regression you need to know about: encode throughput
+### The ugly truth: encode throughput
 
 | Chunk size | Monolithic XOR | Sliced HADR-v2 | Reed–Solomon |
 |---|---|---|---|
@@ -158,73 +150,60 @@ Delta journaling keeps WAF at 3.0× across the whole range. This is the stronges
 | 1 MB | 25.44 GB/s | **0.72 GB/s** | 0.41 GB/s |
 | 16 MB | 12.89 GB/s | **0.94 GB/s** | 0.67 GB/s |
 
-**Sliced HADR-v2 encodes at 0.72–0.95 GB/s — roughly 15–50× slower than Monolithic XOR.** This is the elephant in the room. If the article claimed Sliced HADR-v2 replaces XOR, this table would destroy that claim. It doesn't. It confirms the article's actual thesis: **the two-algorithm split is not optional. Sliced HADR-v2 is a repair-optimized code that is not ready for the hot write path. Monolithic XOR is a hot-path code that is not ready for repair.** You need both, and the benchmark proves it.
+Here is the reality check: **Sliced HADR-v2 encodes at 0.72–0.95 GB/s, making it 15 to 50× slower than Monolithic XOR.** 
+
+If I were trying to sell you Sliced HADR-v2 as a drop-in replacement for XOR, this table would kill my argument on the spot. Instead, it proves why you can't use a single hammer for every nail. Slicing, Merkle hashing, and diagonal indexing add massive overhead during initial ingestion. Sliced HADR-v2 is great at surgical repairs, and terrible at bulk writes. Monolithic XOR screams through bulk writes, and chokes on repairs. You need both.
 
 ### Distributed cluster test
 
-To validate that slice repair and consensus work in a real distributed setup, I tested the prototype on a multi-node consensus mesh running the Nifsi userspace daemon alongside a physical Raspberry Pi 3B+ peer:
+To make sure this wasn't just working in a sterile microbenchmark, I threw it at a messy local cluster setup:
 
 <figure>
   <img src="/assets/images/posts/nifsi-cluster-status.jpg" alt="Nifsi cluster status terminal output">
   <figcaption>Live Nifsi cluster status showing consensus term leadership, active HADR chunks, and connected mesh peers.</figcaption>
 </figure>
 
-- **Cluster topology:** 4-node virtual consensus mesh + 1 physical Raspberry Pi 3B+ (ARM Cortex-A53, Renesas RA4M1 crypto coprocessor).
-- **Concurrency & verification:** 50 files ingested concurrently (22.11 MB total), 46/50 verified bit-for-bit on secondary mount.
-- **Throughput:** 100 random partial writes in 0.016 s (6370 ops/sec), SHA-256 verified.
-- **Fault injection:** Ungraceful `SIGKILL` of `vnode3`: majority quorum (3/4) completed active write in 0.010 s. Resync succeeded.
-- **Physical edge node:** Raspberry Pi: 5/5 files verified bit-for-bit across wireless mesh.
+- 4 virtual consensus nodes on my laptop + 1 physical Raspberry Pi 3B+ over Wi-Fi (ARM Cortex-A53 + an Arduino Uno R4 / Renesas RA4M1 hooked up for hardware state output).
+- 50 files dumped in concurrently (22.11 MB total), with 46/50 verified bit-for-bit on the secondary mount.
+- 100 random partial writes finished in 0.016 s (6,370 ops/sec), all SHA-256 verified.
+- Fired an ungraceful `SIGKILL` at `vnode3` mid-write: the surviving 3/4 quorum finished the write in 0.010 s and resynced cleanly once the node came back.
+- All 5 test files pushed to the Raspberry Pi verified bit-for-bit across the wireless mesh.
 
-### Benchmark caveats
+### Where the benchmark is still sketchy
 
-I want to be precise about what this benchmark does and does not measure:
+I want to be upfront about the flaws in my current testing setup before anyone takes these numbers as gospel:
 
-- **The "4-node virtual consensus mesh" is virtual nodes on the same physical machine.** The 16 KB "network transfer" numbers are what the code believes it is transferring, not what crosses a real LAN. A multi-machine test on real hardware is the next step.
-- **The degraded read latency p50 values are non-monotonic** (4.08 µs at 64 KB, 4.08 µs at 256 KB, 5.97 µs at 1 MB, 11.55 µs at 4 MB, 4.08 µs at 16 MB). This pattern suggests the measurement is dominated by a fixed overhead — likely a syscall or mutex — rather than per-byte repair cost. I'm not claiming latency numbers in this article. The repair *bandwidth* and *WAF* numbers are the ones I trust; the latency numbers need a better harness.
-- **Single physical Pi is not a LAN test.** The Pi verification confirms the code works on ARM, not that the repair path is fast across a real network.
+- **The 4-node mesh is running locally on one machine.** When the table says "16 KB network transfer," that's the payload size the storage engine ships over local sockets, not packets fighting over a physical switch. Running this across four separate physical boxes is next on the list.
+- **The latency numbers are weird.** My degraded read p50 latencies bounced around non-monotonically (4.08 µs at 64 KB, jumping to 11.55 µs at 4 MB, then dropping right back to 4.08 µs at 16 MB). That tells me I'm mostly measuring syscall or mutex overhead rather than per-byte reconstruction time. I trust the bandwidth and WAF numbers because those are structural, but the latency timer needs a rewrite.
+- **One Pi over Wi-Fi isn't a real LAN stress test.** It proves the Rust code compiles and runs cleanly on ARM without corrupting bits, not that the network layer is production-ready.
 
-The benchmark is a proof of concept, not a publication-grade evaluation. It shows the architecture is viable. It does not show the architecture is faster end-to-end.
+## What I got out of this
 
-## What this taught me
+I jumped into this trying to outsmart a basic bitwise operator. Unsurprisingly, XOR won the raw speed fight. 
 
-I set out to push myself to a point of no limits. What I found was a limit — but not the one I expected.
+What I actually learned is that obsessing over the lowest-level primitive is a trap. Once your XOR loop is vectorized, the CPU isn't your problem anymore—memory bandwidth, network repair traffic, and write amplification are. Monolithic XOR destroys my sliced codec on bulk encoding by up to 50×. My sliced codec destroys Monolithic XOR on repair traffic by 4096× and write amplification by 5461×. Neither one can do the other's job.
 
-The limit wasn't "XOR is the best, stop trying." The limit was more useful: **the primitive is only one lever.** The other levers are memory traffic, repair topology, write amplification, and failure handling. XOR isn't the enemy. Assuming one code has to be optimal at everything is.
-
-The benchmark confirmed this in the most concrete way possible. Monolithic XOR wins encode by 15–50×. Sliced HADR-v2 wins repair bandwidth by 4096× and write amplification by up to 5461×. **Neither wins both.** The two-algorithm split is not an architectural preference — it is forced by the numbers.
-
-The most valuable part of this wasn't the answer. It was the discipline of asking a hard question, following it through coding theory, computer arithmetic, and back to first principles, and then having to revise my own conclusions when a sharper framing showed up — and again when the benchmark showed up. Nifsi and the storage design were the vehicle.
-
-The article I started writing would have claimed a bigger result than I actually earned. This one is narrower and, I think, more useful: XOR is an excellent primitive for binary linear coding, but a distributed storage system's performance depends on the interaction between coding structure, memory traffic, repair bandwidth, and failure handling. The benchmark now shows exactly where each code sits in that space.
+If I had written this post two weeks ago, I probably would have embarrassed myself claiming I invented a magic replacement for XOR. Actually writing the code, watching the encode numbers tank, and figuring out *why* they tanked was worth way more than any textbook chapter I've zoned out of in college.
 
 ## What's next
 
-The next step is the one the benchmark points at: **build the actual hybrid.**
+The benchmark basically wrote my roadmap for me. The next move for Nifsi is wiring up a hybrid engine that uses both paths:
 
-- **Hot write path:** Monolithic XOR (12.89–37.18 GB/s encode, WAF 64–16384× — acceptable because full-stripe writes avoid RMW).
-- **Repair path:** Sliced HADR-v2 slice-level repair (16 KB constant repair transfer, WAF 3.0×).
-- **Small updates:** Delta journaling (constant 3.0× WAF).
-- **Integrity:** Per-fragment hashes and authenticated versioning, separate from both codecs.
-- **Benchmark harness:** Real multi-machine LAN test, per-byte latency breakdown (not just p50), and a comparison against a production binary array code (Liberation or RDP) with documented parameters.
+- **Hot write path:** Dump incoming full-stripe writes through Monolithic XOR at 12–37 GB/s so ingestion doesn't bottleneck.
+- **Background & repair path:** Index chunks into 4 KB slices with Merkle trees so degraded reads and node repairs only pull 16 KB over the network.
+- **Small overwrites:** Route random partial updates through the delta journal to keep write amplification pinned at 3.0×.
+- **Better benchmarking:** Put this on real multi-node LAN hardware, fix the latency harness so it stops measuring mutex locks, and benchmark directly against a standard C implementation of Liberation or RDP.
 
-I'm also going to fix the latency measurement harness — the non-monotonic p50 values are a signal that I'm measuring the wrong thing, and the next round needs to separate fixed overhead from per-byte repair cost.
+If you spend your free time messing with erasure coding, FUSE filesystems, or distributed storage on LAN clusters, I'd love to compare notes. 
 
-If you're working on erasure coding, repair efficiency, or distributed storage on LAN clusters, I'd like to compare notes.
-
-I don't know where this ends. That's the point.
+I still don't know where this project ends, which is the whole point of building it.
 
 ## Benchmark code and artifacts
 
 **[nifsi-benchmarks on GitHub](https://github.com/phi5ic/Nifsi/tree/main/benchmarks)**
 
-THE CODE FOR THE BENCHMARK IS AI GENERATED (Gemini flash 3.8)
+*Full disclosure: The benchmark harness scripts were generated with Gemini Flash 3.8 so I could spend my time on the storage engine instead of boilerplate.*
 
-The repo contains the harness (`bench/`), the raw results (`results/benchmark_results.json`), the long-form report (`results/BENCHMARK_SCIENTIFIC_REPORT.md`), and the failure-injection and verification scripts (`scripts/`). The commit hash that produced the tables in this article is `REPLACE_WITH_COMMIT_HASH`.
+The repo has the harness (`bench/`), raw JSON dumps (`results/benchmark_results.json`), the longer write-up (`results/BENCHMARK_SCIENTIFIC_REPORT.md`), and the chaos/kill scripts (`scripts/`). The commit hash for the exact run in the tables above is `REPLACE_WITH_COMMIT_HASH`.
 
-A few notes on what you'll find:
-
-- Single physical machine, 4-node virtual consensus mesh. "16 KB network transfer" is what the code believes it transfers; it has not crossed a real LAN yet.
-- Degraded-read latency p50 is non-monotonic across chunk sizes, suggesting fixed overhead dominates. Bandwidth and WAF are the numbers I trust; latency needs a better harness.
-- Reed–Solomon baseline is Cauchy RS GF(2⁸) with `k=4, p=2`. Full parameters in the report.
-
-Bugs, non-reproducing results, and misconfigurations are welcome as issues.
+If you find bugs, cursed math, or non-reproducible results, open an issue and roast me there.
