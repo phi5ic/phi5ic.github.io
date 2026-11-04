@@ -31,7 +31,7 @@ const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
     <!-- Header -->
     <header class="space-y-4 border-b border-[#292e42] pb-6">
       <div class="mb-2">
-        <a href="/posts/" class="text-xs font-mono text-[#7aa2f7] hover:text-[#7dcfff] no-underline">
+        <a href="/posts/" class="text-xs text-[#7aa2f7] hover:text-[#7dcfff] no-underline">
           &larr; writing
         </a>
       </div>
@@ -40,7 +40,7 @@ const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
         {post.data.title}
       </h1>
 
-      <div class="flex items-center gap-3 text-xs font-mono text-[#565f89]">
+      <div class="flex items-center gap-3 text-xs text-[#565f89]">
         <time datetime={post.data.date.toISOString()}>{formattedDate}</time>
         <span>&bull;</span>
         <span>{readTimeMinutes} min read</span>
@@ -59,7 +59,7 @@ const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
     </div>
 
     <!-- Minimalist Post Signoff -->
-    <footer class="pt-8 border-t border-[#292e42] text-xs font-mono text-[#565f89] space-y-3">
+    <footer class="pt-8 border-t border-[#292e42] text-xs text-[#565f89] space-y-3">
       {post.data.tags && post.data.tags.length > 0 && (
         <div>
           tags: {post.data.tags.map((t: string) => `#${t}`).join(' ')}

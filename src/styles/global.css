@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@fontsource/inter/latin.css";
 @import "katex/dist/katex.min.css";
 
 :root {
@@ -15,7 +16,7 @@
 html {
   background-color: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
 }
@@ -23,6 +24,7 @@ html {
 body {
   background-color: var(--bg);
   min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 a {
@@ -38,7 +40,7 @@ a:hover {
   text-decoration-color: var(--accent-cyan);
 }
 
-/* Monospace & inline code */
+/* Monospace restricted only to code tags */
 code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.9em;
@@ -60,7 +62,7 @@ code {
 }
 
 .prose-minimal h2 {
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
   color: #ffffff;
   margin-top: 2.75rem;
@@ -177,7 +179,7 @@ code {
   font-style: italic;
 }
 
-/* KaTeX equations: simple & centered */
+/* KaTeX equations */
 .katex-display {
   margin: 1.5rem 0;
   overflow-x: auto;
