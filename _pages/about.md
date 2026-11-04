@@ -26,4 +26,4 @@ I'm **Aravind Anilraj** (`phi5ic`). I'm a systems engineer and Linux contributor
 Feel free to explore my repositories or get in touch:
 - **GitHub:** [@phi5ic](https://github.com/phi5ic)
 - **Email:** [aravindanilraj0702@gmail.com](mailto:aravindanilraj0702@gmail.com)
-- **Linkedin:** [Aravind Anilraj] (https://www.linkedin.com/in/aravind-anilraj/) 
+- **LinkedIn:** [Aravind Anilraj](https://www.linkedin.com/in/aravind-anilraj/) 
