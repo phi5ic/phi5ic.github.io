@@ -2,49 +2,17 @@
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="mt-24 border-t border-white/5 bg-[#0d0e15]/80 backdrop-blur-md py-12 px-6">
-  <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-sm text-[#565f89]">
-    <div class="flex flex-col items-center md:items-start gap-1">
-      <p class="text-[#9aa5ce] font-medium">
-        &copy; {currentYear} Aravind Anilraj (<span class="font-mono text-[#7aa2f7]">phi5ic</span>)
-      </p>
-      <p class="text-xs text-[#565f89]">
-        Built with Astro &bull; Styled with Tokyo Night &bull; Blazingly fast & 100% static
-      </p>
+<footer class="border-t border-[#292e42] mt-20 py-8 text-xs font-mono text-[#565f89]">
+  <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-0">
+    <div>
+      &copy; {currentYear} Aravind Anilraj (phi5ic)
     </div>
-
-    <div class="flex items-center gap-5 text-xs text-[#9aa5ce]">
-      <a
-        href="https://github.com/phi5ic"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="hover:text-[#7dcfff] transition-colors"
-      >
-        GitHub
-      </a>
-      <span class="text-white/10">&bull;</span>
-      <a
-        href="https://www.linkedin.com/in/aravind-anilraj/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="hover:text-[#7aa2f7] transition-colors"
-      >
-        LinkedIn
-      </a>
-      <span class="text-white/10">&bull;</span>
-      <a
-        href="mailto:aravindanilraj0702@gmail.com"
-        class="hover:text-[#bb9af7] transition-colors"
-      >
-        Email
-      </a>
-      <span class="text-white/10">&bull;</span>
-      <a
-        href="/posts/"
-        class="hover:text-[#9ece6a] transition-colors"
-      >
-        Archive
-      </a>
+    <div class="flex items-center gap-4">
+      <a href="https://github.com/phi5ic" target="_blank" rel="noopener noreferrer" class="no-underline hover:text-[#7aa2f7]">github</a>
+      <span>&bull;</span>
+      <a href="https://www.linkedin.com/in/aravind-anilraj/" target="_blank" rel="noopener noreferrer" class="no-underline hover:text-[#7aa2f7]">linkedin</a>
+      <span>&bull;</span>
+      <a href="mailto:aravindanilraj0702@gmail.com" class="no-underline hover:text-[#7aa2f7]">email</a>
     </div>
   </div>
 </footer>

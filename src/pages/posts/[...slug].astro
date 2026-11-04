@@ -11,7 +11,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content, headings } = await render(post);
+const { Content } = await render(post);
 
 const formattedDate = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -19,7 +19,6 @@ const formattedDate = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 }).format(post.data.date);
 
-// Rough word count and reading time
 const wordCount = (post.body || '').split(/\s+/).length;
 const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
 ---
@@ -27,116 +26,50 @@ const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
 <BaseLayout
   title={`${post.data.title} — Aravind Anilraj`}
   description={post.data.excerpt}
-  image={post.data.header?.teaser || '/assets/images/posts/nifsi-cluster-status.jpg'}
 >
-  <article class="max-w-3xl mx-auto py-6 sm:py-10">
-    <!-- Breadcrumb & Back -->
-    <div class="mb-8 flex items-center justify-between">
-      <a
-        href="/posts/"
-        class="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-[#7aa2f7] hover:text-[#7dcfff] transition-colors group"
-      >
-        <span class="transition-transform group-hover:-translate-x-1">&larr;</span>
-        <span>Back to Writing</span>
-      </a>
-
-      <div class="flex items-center gap-2">
-        {post.data.categories?.map((cat: string) => (
-          <span class="px-2.5 py-1 text-xs font-mono font-medium rounded-full bg-[#7aa2f7]/10 text-[#7aa2f7] border border-[#7aa2f7]/20">
-            {cat}
-          </span>
-        ))}
+  <article class="space-y-8">
+    <!-- Header -->
+    <header class="space-y-4 border-b border-[#292e42] pb-6">
+      <div class="mb-2">
+        <a href="/posts/" class="text-xs font-mono text-[#7aa2f7] hover:text-[#7dcfff] no-underline">
+          &larr; writing
+        </a>
       </div>
-    </div>
 
-    <!-- Article Header -->
-    <header class="mb-12">
-      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+      <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-snug">
         {post.data.title}
       </h1>
 
-      <p class="text-lg sm:text-xl text-[#9aa5ce] leading-relaxed mb-6 font-normal">
-        {post.data.excerpt}
-      </p>
-
-      <div class="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-[#565f89] pt-4 border-t border-white/5">
-        <div class="flex items-center gap-2">
-          <div class="w-6 h-6 rounded-full bg-gradient-to-tr from-[#7aa2f7] to-[#bb9af7] flex items-center justify-center text-[10px] font-bold text-white">
-            phi
-          </div>
-          <span class="text-[#c0caf5] font-medium">Aravind Anilraj</span>
-        </div>
+      <div class="flex items-center gap-3 text-xs font-mono text-[#565f89]">
+        <time datetime={post.data.date.toISOString()}>{formattedDate}</time>
         <span>&bull;</span>
-        <time datetime={post.data.date.toISOString()} class="text-[#9aa5ce]">
-          {formattedDate}
-        </time>
-        <span>&bull;</span>
-        <span class="text-[#9aa5ce]">
-          {readTimeMinutes} min read
-        </span>
+        <span>{readTimeMinutes} min read</span>
+        {post.data.categories && post.data.categories.length > 0 && (
+          <>
+            <span>&bull;</span>
+            <span class="text-[#7aa2f7]">{post.data.categories.join(', ')}</span>
+          </>
+        )}
       </div>
     </header>
 
-    <!-- Table of Contents (Pill style if multiple headings) -->
-    {headings && headings.length > 2 && (
-      <details class="glass-card p-4 sm:p-5 mb-10 text-xs sm:text-sm group">
-        <summary class="cursor-pointer font-semibold text-white flex items-center justify-between list-none">
-          <span class="flex items-center gap-2 text-[#7dcfff]">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
-            </svg>
-            Table of Contents
-          </span>
-          <span class="text-[#565f89] group-open:rotate-180 transition-transform">&darr;</span>
-        </summary>
-        <nav class="mt-4 pt-3 border-t border-white/5 flex flex-col gap-1.5 pl-2">
-          {headings.filter((h) => h.depth <= 3).map((h) => (
-            <a
-              href={`#${h.slug}`}
-              class={`hover:text-[#7dcfff] transition-colors py-0.5 ${
-                h.depth === 2 ? 'text-[#c0caf5] font-medium' : 'text-[#7982a9] pl-4 text-xs'
-              }`}
-            >
-              {h.text}
-            </a>
-          ))}
-        </nav>
-      </details>
-    )}
-
-    <!-- Post Body -->
-    <div class="prose-tokyo">
+    <!-- Post Content -->
+    <div class="prose-minimal">
       <Content />
     </div>
 
-    <!-- Tags Footer -->
-    {post.data.tags && post.data.tags.length > 0 && (
-      <div class="mt-14 pt-8 border-t border-white/10 flex flex-wrap items-center gap-2">
-        <span class="text-xs text-[#565f89] font-mono mr-2">Tags:</span>
-        {post.data.tags.map((tag: string) => (
-          <span class="px-3 py-1 text-xs font-mono rounded-lg bg-white/5 text-[#9aa5ce] border border-white/5">
-            #{tag}
-          </span>
-        ))}
-      </div>
-    )}
-
-    <!-- Author Bio Card -->
-    <div class="glass-card mt-12 p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#7aa2f7] to-[#bb9af7] flex items-center justify-center text-xl font-bold text-white shadow-lg shrink-0">
-        phi5ic
-      </div>
-      <div class="flex-grow text-center sm:text-left">
-        <h3 class="text-lg font-bold text-white mb-1">Aravind Anilraj</h3>
-        <p class="text-sm text-[#9aa5ce] mb-4 leading-relaxed">
-          Systems engineer and Linux contributor building <a href="https://github.com/phi5ic/Nifsi" class="text-[#7dcfff] hover:underline" target="_blank">Nifsi</a>, a distributed userspace OS layer in Rust. Writing about storage architectures, array codes, and kernel internals.
-        </p>
-        <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs font-medium text-[#7aa2f7]">
-          <a href="https://github.com/phi5ic" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">GitHub &rarr;</a>
-          <a href="https://www.linkedin.com/in/aravind-anilraj/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">LinkedIn &rarr;</a>
-          <a href="mailto:aravindanilraj0702@gmail.com" class="hover:text-white transition-colors">Contact &rarr;</a>
+    <!-- Minimalist Post Signoff -->
+    <footer class="pt-8 border-t border-[#292e42] text-xs font-mono text-[#565f89] space-y-3">
+      {post.data.tags && post.data.tags.length > 0 && (
+        <div>
+          tags: {post.data.tags.map((t: string) => `#${t}`).join(' ')}
         </div>
+      )}
+      <div class="pt-2">
+        <a href="/posts/" class="text-[#7aa2f7] hover:text-[#7dcfff] no-underline">
+          &larr; back to all posts
+        </a>
       </div>
-    </div>
+    </footer>
   </article>
 </BaseLayout>

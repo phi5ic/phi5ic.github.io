@@ -1,67 +1,28 @@
 ---
-interface Props {
-  currentPath?: string;
-}
-
-const { currentPath = Astro.url.pathname } = Astro.props;
-
 const navItems = [
-  { label: 'Home', href: '/' },
-  { label: 'Writing', href: '/posts/' },
-  { label: 'About', href: '/about/' },
+  { label: 'writing', href: '/posts/' },
+  { label: 'about', href: '/about/' },
+  { label: 'github', href: 'https://github.com/phi5ic', external: true },
 ];
-
-const isActive = (href: string) => {
-  if (href === '/') return currentPath === '/';
-  return currentPath.startsWith(href);
-};
 ---
 
-<header class="fixed top-4 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none">
-  <nav class="pointer-events-auto flex items-center justify-between gap-3 sm:gap-6 px-4 sm:px-6 py-2.5 rounded-full glass-pill max-w-2xl w-full">
-    <!-- Brand / Logo -->
-    <a href="/" class="flex items-center gap-2.5 group">
-      <div class="relative flex h-3 w-3">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7dcfff] opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-3 w-3 bg-[#7aa2f7]"></span>
-      </div>
-      <span class="font-bold tracking-tight text-white group-hover:text-[#7dcfff] transition-colors text-sm sm:text-base font-mono">
-        phi5ic<span class="text-[#bb9af7]">.dev</span>
-      </span>
+<header class="border-b border-[#292e42] py-4 mb-12">
+  <div class="max-w-2xl mx-auto flex items-baseline justify-between px-4 sm:px-0">
+    <a href="/" class="font-bold text-white tracking-tight font-mono text-base no-underline hover:text-[#7dcfff]">
+      phi5ic
     </a>
 
-    <!-- Nav Links -->
-    <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm font-medium">
-      {navItems.map((item) => {
-        const active = isActive(item.href);
-        return (
-          <a
-            href={item.href}
-            class={`px-3 py-1.5 rounded-full transition-all duration-200 ${
-              active
-                ? 'bg-white/10 text-white font-semibold shadow-sm border border-white/10'
-                : 'text-[#9aa5ce] hover:text-white hover:bg-white/5'
-            }`}
-          >
-            {item.label}
-          </a>
-        );
-      })}
-    </div>
-
-    <!-- Quick Actions / Social -->
-    <div class="flex items-center gap-2">
-      <a
-        href="https://github.com/phi5ic"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="GitHub Profile"
-        class="p-1.5 rounded-full text-[#9aa5ce] hover:text-white hover:bg-white/10 transition-colors"
-      >
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-        </svg>
-      </a>
-    </div>
-  </nav>
+    <nav class="flex items-center gap-5 text-sm font-mono">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          target={item.external ? '_blank' : undefined}
+          rel={item.external ? 'noopener noreferrer' : undefined}
+          class="text-[#7aa2f7] hover:text-[#7dcfff] no-underline"
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+  </div>
 </header>

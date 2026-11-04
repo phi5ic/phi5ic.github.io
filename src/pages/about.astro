@@ -1,189 +1,77 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-const interests = [
-  {
-    title: 'Storage Architecture & Coding Theory',
-    desc: 'Erasure coding, MDS array codes (EVENODD, RDP, Liberation, STAR), slice-level regeneration, and write-amplification minimization.',
-    badge: 'Coding Theory',
-    color: 'from-[#7dcfff] to-[#7aa2f7]',
-  },
-  {
-    title: 'Distributed Computing',
-    desc: 'Virtual consensus meshes, decentralized state replication, and fast fault recovery across heterogeneous nodes.',
-    badge: 'Distributed Systems',
-    color: 'from-[#bb9af7] to-[#7aa2f7]',
-  },
-  {
-    title: 'Operating Systems & Linux',
-    desc: 'Linux kernel contributions, userspace subsystems, FUSE filesystems, and systems performance engineering.',
-    badge: 'Kernel / OS',
-    color: 'from-[#9ece6a] to-[#7dcfff]',
-  },
-  {
-    title: 'Computer Arithmetic & SIMD',
-    desc: 'Hot-path SIMD optimizations, finite-field arithmetic over GF(2ᵐ), carry-less multiplication, and hardware crypto.',
-    badge: 'Low-Level Optimization',
-    color: 'from-[#ff9e64] to-[#f7768e]',
-  },
-];
-
-const projects = [
-  {
-    name: 'Nifsi',
-    url: 'https://github.com/phi5ic/Nifsi',
-    tag: 'Core Project',
-    tagColor: 'text-[#7dcfff] bg-[#7dcfff]/10 border-[#7dcfff]/20',
-    desc: 'An open-source distributed userspace operating system layer on Linux in Rust, targeting 10 to 50 nodes. Features self-healing HADR storage engine, slice-level repair, and fast consensus.',
-  },
-  {
-    name: 'StabiSense',
-    url: 'https://github.com/phi5ic/StabiSense',
-    tag: 'IEEE Thailand 2026',
-    tagColor: 'text-[#bb9af7] bg-[#bb9af7]/10 border-[#bb9af7]/20',
-    desc: 'Myosa 5.0 finalist project. Dynamically stabilizes chipsets during manufacturing. Presented at the IEEE Thailand Biosensors Conference (2026).',
-  },
-  {
-    name: 'Qgis-Simulation',
-    url: 'https://github.com/phi5ic/Qgis-Simulation',
-    tag: '1st Place Hackathon',
-    tagColor: 'text-[#9ece6a] bg-[#9ece6a]/10 border-[#9ece6a]/20',
-    desc: 'A high-performance spatial analysis tool designed to identify water pipeline breaches by combining Machine Learning, Dijkstra’s Pathfinding, and Copernicus SAR Imagery. Won first place at the Flowvision Hackathon under Brahma26 (ASIET).',
-  },
-];
 ---
 
 <BaseLayout
   title="About — Aravind Anilraj (phi5ic)"
   description="Systems engineer and Linux contributor. Research in erasure coding, distributed consensus, and Linux kernel internals."
 >
-  <div class="max-w-4xl mx-auto py-8 sm:py-14 space-y-16">
-    <!-- Hero / Intro -->
-    <section class="flex flex-col md:flex-row items-center md:items-start gap-8">
-      <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-tr from-[#7aa2f7] via-[#bb9af7] to-[#7dcfff] p-[2px] shadow-2xl shrink-0">
-        <div class="w-full h-full bg-[#16161e] rounded-[22px] flex items-center justify-center font-mono font-bold text-2xl text-white">
-          phi5ic
-        </div>
-      </div>
+  <div class="space-y-10">
+    <header class="border-b border-[#292e42] pb-3">
+      <h1 class="text-xl font-bold text-white tracking-tight">About</h1>
+    </header>
 
-      <div class="space-y-4 text-center md:text-left flex-grow">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-medium text-[#7aa2f7] bg-[#7aa2f7]/10 border border-[#7aa2f7]/20">
-          Systems Engineer &bull; Linux Contributor
-        </div>
-        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
-          Aravind Anilraj
-        </h1>
-        <p class="text-base sm:text-lg text-[#9aa5ce] leading-relaxed max-w-2xl">
-          I'm a systems engineer and Linux contributor building <a href="https://github.com/phi5ic/Nifsi" class="text-[#7dcfff] hover:underline font-medium" target="_blank" rel="noopener noreferrer">Nifsi</a>, an open-source distributed userspace operating system layer designed for multi-node Linux environments.
-        </p>
-      </div>
+    <section class="space-y-4 text-base text-[#c0caf5] leading-relaxed">
+      <p>
+        I'm <strong>Aravind Anilraj</strong> (<code>phi5ic</code>). I'm a systems engineer and Linux contributor currently building <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer">Nifsi</a>, an open-source distributed userspace operating system layer designed for multi-node Linux environments.
+      </p>
     </section>
 
     <!-- Research & Interests -->
-    <section class="space-y-6">
-      <div class="border-b border-white/5 pb-4">
-        <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#7dcfff]"></span>
-          Research & Focus Areas
-        </h2>
-        <p class="text-sm text-[#565f89] mt-1">Core architectural domains I actively investigate, design, and benchmark.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {interests.map((item) => (
-          <div class="glass-card p-6 flex flex-col justify-between group">
-            <div>
-              <div class="text-[11px] font-mono uppercase tracking-wider text-[#7aa2f7] mb-2 font-semibold">
-                {item.badge}
-              </div>
-              <h3 class="text-base font-bold text-white group-hover:text-[#7dcfff] transition-colors mb-2">
-                {item.title}
-              </h3>
-              <p class="text-sm text-[#9aa5ce] leading-relaxed">
-                {item.desc}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+    <section class="space-y-3">
+      <h2 class="text-xs font-mono uppercase tracking-wider text-[#565f89] border-b border-[#292e42] pb-2">
+        research &amp; interests
+      </h2>
+      <ul class="space-y-2.5 text-sm list-disc pl-5 text-[#a9b1d6]">
+        <li>
+          <strong class="text-white">Storage Architecture &amp; Coding Theory:</strong> Erasure coding, MDS array codes (EVENODD, RDP, Liberation, STAR), slice-level regeneration, and write-amplification minimization.
+        </li>
+        <li>
+          <strong class="text-white">Distributed Computing:</strong> Virtual consensus meshes, decentralized state replication, and fast fault recovery.
+        </li>
+        <li>
+          <strong class="text-white">Operating Systems &amp; Linux:</strong> Linux kernel contributions, userspace subsystems, and systems performance engineering.
+        </li>
+        <li>
+          <strong class="text-white">Computer Arithmetic:</strong> Hot-path SIMD optimizations, finite-field arithmetic over GF(2ᵐ), and hardware-accelerated crypto.
+        </li>
+      </ul>
     </section>
 
-    <!-- Featured Projects -->
-    <section class="space-y-6">
-      <div class="border-b border-white/5 pb-4">
-        <h2 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#bb9af7]"></span>
-          Featured Projects
-        </h2>
-        <p class="text-sm text-[#565f89] mt-1">Open source code, hackathon victories, and conference papers.</p>
-      </div>
-
-      <div class="grid grid-cols-1 gap-5">
-        {projects.map((proj) => (
-          <a
-            href={proj.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="glass-card p-6 sm:p-7 block group relative overflow-hidden"
-          >
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-              <div class="flex items-center gap-3">
-                <h3 class="text-lg sm:text-xl font-bold text-white group-hover:text-[#7dcfff] transition-colors flex items-center gap-2">
-                  {proj.name}
-                  <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                  </svg>
-                </h3>
-              </div>
-              <span class={`px-2.5 py-0.5 rounded-full text-xs font-mono font-medium border w-fit ${proj.tagColor}`}>
-                {proj.tag}
-              </span>
-            </div>
-            <p class="text-sm text-[#9aa5ce] leading-relaxed">
-              {proj.desc}
-            </p>
-          </a>
-        ))}
-      </div>
+    <!-- Projects -->
+    <section class="space-y-3">
+      <h2 class="text-xs font-mono uppercase tracking-wider text-[#565f89] border-b border-[#292e42] pb-2">
+        projects
+      </h2>
+      <ul class="space-y-3 text-sm list-disc pl-5 text-[#a9b1d6]">
+        <li>
+          <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff]">Nifsi</a>: A distributed userspace OS layer on Linux.
+        </li>
+        <li>
+          <a href="https://github.com/phi5ic/StabiSense" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff]">StabiSense</a>: Myosa 5.0 finalist project, dynamically stabilizes chipsets during manufacturing, presented in IEEE Thailand Biosensors Conference (2026).
+        </li>
+        <li>
+          <a href="https://github.com/phi5ic/Qgis-Simulation" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff]">Qgis-Simulation</a>: High-performance spatial analysis tool designed to identify water pipeline breaches by combining Machine Learning, Dijkstra’s Pathfinding, and Copernicus SAR Imagery. Won first place at Flowvision Hackathon under Brahma26 (ASIET).
+        </li>
+        <li>
+          <strong class="text-white">Technical Writing:</strong> Rigorous benchmarks, architecture postmortems, and engineering deep dives.
+        </li>
+      </ul>
     </section>
 
-    <!-- Connect / Contact -->
-    <section class="glass-card p-8 text-center space-y-6">
-      <div class="max-w-md mx-auto space-y-2">
-        <h2 class="text-2xl font-bold text-white">Let's Connect</h2>
-        <p class="text-sm text-[#9aa5ce]">
-          Feel free to explore my repositories, discuss distributed storage, or get in touch.
-        </p>
-      </div>
-
-      <div class="flex flex-wrap items-center justify-center gap-4">
-        <a
-          href="https://github.com/phi5ic"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/15 text-white font-medium text-sm transition-all border border-white/10 flex items-center gap-2"
-        >
-          <span>GitHub</span>
-          <span class="text-[#7dcfff] font-mono">@phi5ic</span>
-        </a>
-
-        <a
-          href="https://www.linkedin.com/in/aravind-anilraj/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="px-5 py-2.5 rounded-full bg-[#7aa2f7]/15 hover:bg-[#7aa2f7]/25 text-[#7aa2f7] font-medium text-sm transition-all border border-[#7aa2f7]/30 flex items-center gap-2"
-        >
-          <span>LinkedIn</span>
-          <span class="text-white font-mono">Aravind Anilraj</span>
-        </a>
-
-        <a
-          href="mailto:aravindanilraj0702@gmail.com"
-          class="px-5 py-2.5 rounded-full bg-[#bb9af7]/15 hover:bg-[#bb9af7]/25 text-[#bb9af7] font-medium text-sm transition-all border border-[#bb9af7]/30 flex items-center gap-2"
-        >
-          <span>Email Me</span>
-        </a>
-      </div>
+    <!-- Connect -->
+    <section class="space-y-3">
+      <h2 class="text-xs font-mono uppercase tracking-wider text-[#565f89] border-b border-[#292e42] pb-2">
+        connect
+      </h2>
+      <p class="text-sm text-[#9aa5ce]">
+        Feel free to explore my repositories or get in touch:
+      </p>
+      <ul class="space-y-1.5 text-sm font-mono">
+        <li>&bull; GitHub: <a href="https://github.com/phi5ic" target="_blank" rel="noopener noreferrer">@phi5ic</a></li>
+        <li>&bull; Email: <a href="mailto:aravindanilraj0702@gmail.com">aravindanilraj0702@gmail.com</a></li>
+        <li>&bull; LinkedIn: <a href="https://www.linkedin.com/in/aravind-anilraj/" target="_blank" rel="noopener noreferrer">Aravind Anilraj</a></li>
+      </ul>
     </section>
   </div>
 </BaseLayout>
