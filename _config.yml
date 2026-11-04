@@ -13,14 +13,26 @@ minimal_mistakes_skin: "catppuccin_mocha"
 plugins:
   - jekyll-include-cache
 
+# Search
+search: true
+search_full_content: true
+
+# Include custom directories
+include:
+  - _pages
+
 # Site Author (for sidebar)
 author:
-  name: "phi5ic (Aravind Anilraj)"
+  name: "Aravind Anilraj"
+  avatar: "https://github.com/phi5ic.png"
   bio: "Building Nifsi, a distributed OS layer, and a Linux contributor."
   links:
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/phi5ic"
+    - label: "Email"
+      icon: "fas fa-fw fa-envelope"
+      url: "mailto:aravindanilraj0702@gmail.com"
 
 # Pagination
 paginate: 5
@@ -29,6 +41,8 @@ paginate_path: "/page:num/"
 # Exclude from processing
 # _config.yml
 exclude:
+  - bin
+  - .bundle
   - Gemfile
   - Gemfile.lock
   - node_modules
@@ -51,6 +65,16 @@ defaults:
       layout: single
       author_profile: true
       read_time: true
+      show_date: true
       comments: false
       share: true
       related: true
+      toc: true
+      toc_sticky: true
+      toc_label: "On This Page"
+      toc_icon: "list-ul"
+  - scope:
+      path: "_pages"
+    values:
+      layout: single
+      author_profile: true

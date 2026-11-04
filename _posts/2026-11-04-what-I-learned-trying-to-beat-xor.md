@@ -1,10 +1,16 @@
 ---
 title: "What I Learned Trying to Beat XOR"
 date: 2026-11-04
+excerpt: "Can XOR be beaten in erasure-coded storage? An investigation into scalar vs array codes, slice-level repair, and benchmark results comparing Sliced HADR-v2 against monolithic XOR."
 categories:
   - storage
   - coding-theory
   - distributed-systems
+tags:
+  - erasure-coding
+  - xor
+  - nifsi
+  - storage
 use_math: true
 ---
 
