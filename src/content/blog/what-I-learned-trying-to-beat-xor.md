@@ -206,4 +206,4 @@ I still don't know where this project ends, which is the whole point of building
 
 The repo has the harness (`bench/`), raw JSON dumps (`results/benchmark_results.json`), the longer write-up (`results/BENCHMARK_SCIENTIFIC_REPORT.md`), and the chaos/kill scripts (`scripts/`). The commit hash for the exact run in the tables above is `REPLACE_WITH_COMMIT_HASH`.
 
-If you find bugs, cursed math, or non-reproducible results, open an issue and roast me there.
+If you find bugs, cursed math, or non-reproducible results, open an issue and please do let me know.
