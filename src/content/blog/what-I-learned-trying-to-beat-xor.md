@@ -50,7 +50,7 @@ Still stubbornly trying to see if the primitive itself could be replaced, I poke
 
 **Non-linear codes.** A few non-linear constructions have decent encoders or decoders, but most don't, especially for the arbitrary erasure patterns storage systems care about. I didn't find anything here that credibly beat binary array codes for my workload (though that's just a statement about what I looked at, not a mathematical proof).
 
-A conversation with Akari Hayami, a researcher in formal verification I found on LinkedIn, finally helped me untangle two questions I had been mashing together: whether XOR is *mathematically necessary* for chunk regeneration, and whether it's simply the *fastest practical choice* on modern silicon. Akari pointed out that XOR is just addition in characteristic 2, and systems use it because hardware loves it, not because the algebra forces you to. 
+A conversation with <a href="https://www.linkedin.com/in/a-hayami-c0/" target="_blank" rel="noopener noreferrer">Akari Hayami</a>, a researcher in formal verification I found on LinkedIn, finally helped me untangle two questions I had been mashing together: whether XOR is *mathematically necessary* for chunk regeneration, and whether it's simply the *fastest practical choice* on modern silicon. Akari pointed out that XOR is just addition in characteristic 2, and systems use it because hardware loves it, not because the algebra forces you to. 
 
 That reframed everything. I wasn't fighting XOR anymore; I was fighting the cost of addition and multiplication on the hot path.
 
