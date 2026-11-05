@@ -43,6 +43,36 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
     <!-- Instant sub-50ms View Transitions -->
     <ClientRouter />
+
+    <!-- GoatCounter Analytics -->
+    <script is:inline>
+      window.goatcounter = { no_onload: true };
+    </script>
+    <script
+      data-goatcounter="https://phi5ic.goatcounter.com/count"
+      async
+      src="//gc.zgo.at/count.js"
+    ></script>
+    <script is:inline>
+      document.addEventListener('astro:page-load', () => {
+        const send = () => {
+          if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+            window.goatcounter.count({
+              path: window.location.pathname + window.location.search + window.location.hash,
+            });
+          }
+        };
+
+        if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+          send();
+        } else {
+          const script = document.querySelector('script[data-goatcounter]');
+          if (script) {
+            script.addEventListener('load', send, { once: true });
+          }
+        }
+      });
+    </script>
   </head>
   <body class="flex flex-col min-h-screen text-[#a9b1d6] bg-[#16161e]">
     <Header />
