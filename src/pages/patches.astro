@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Kernel Contributions — Aravind Anilraj (phi5ic)"
+  description="Patches submitted to the Linux kernel upstream across sound and thermal subsystems."
+>
+  <div class="space-y-10">
+    <header class="border-b border-[#292e42] pb-3">
+      <h1 class="text-xl font-bold text-white tracking-tight">Kernel Contributions</h1>
+      <p class="text-sm text-[#7aa2f7] mt-1">
+        Patches submitted to the Linux kernel upstream.
+      </p>
+    </header>
+
+    <!-- Merged -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between border-b border-[#292e42] pb-2">
+        <h2 class="text-xs uppercase tracking-wider text-[#565f89] font-medium">
+          merged
+        </h2>
+        <span class="text-xs text-[#9ece6a] font-mono">6 patches</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-[#292e42] text-xs uppercase tracking-wider text-[#565f89]">
+              <th class="py-2.5 px-3 font-semibold text-white">Patch</th>
+              <th class="py-2.5 px-3 font-semibold text-white">Subsystem</th>
+              <th class="py-2.5 px-3 font-semibold text-white">Link</th>
+              <th class="py-2.5 px-3 font-semibold text-white whitespace-nowrap">Stable backport</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#292e42] text-xs sm:text-sm">
+            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
+              <td class="py-2.5 px-3 text-[#c0caf5] font-medium">ASoC: bytcr_rt5640: fix MCLK resource leak</td>
+              <td class="py-2.5 px-3 text-[#a9b1d6] whitespace-nowrap">ASoC / Intel</td>
+              <td class="py-2.5 px-3 whitespace-nowrap">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=a02496a29463" target="_blank" rel="noopener noreferrer">broonie/sound</a>
+              </td>
+              <td class="py-2.5 px-3 text-[#9ece6a] whitespace-nowrap font-mono">5.10+</td>
+            </tr>
+            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
+              <td class="py-2.5 px-3 text-[#c0caf5] font-medium">ASoC: bytcr_rt5651: fix MCLK resource leak</td>
+              <td class="py-2.5 px-3 text-[#a9b1d6] whitespace-nowrap">ASoC / Intel</td>
+              <td class="py-2.5 px-3 whitespace-nowrap">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=b022e5c142ef" target="_blank" rel="noopener noreferrer">broonie/sound</a>
+              </td>
+              <td class="py-2.5 px-3 text-[#9ece6a] whitespace-nowrap font-mono">5.10+</td>
+            </tr>
+            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
+              <td class="py-2.5 px-3 text-[#c0caf5] font-medium">ASoC: cht_bsw_rt5672: fix MCLK resource leak</td>
+              <td class="py-2.5 px-3 text-[#a9b1d6] whitespace-nowrap">ASoC / Intel</td>
+              <td class="py-2.5 px-3 whitespace-nowrap">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=dced5a373a96" target="_blank" rel="noopener noreferrer">broonie/sound</a>
+              </td>
+              <td class="py-2.5 px-3 text-[#9ece6a] whitespace-nowrap font-mono">5.10+</td>
+            </tr>
+            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
+              <td class="py-2.5 px-3 text-[#c0caf5] font-medium">ASoC: Standardize MCLK error logs across RT boards</td>
+              <td class="py-2.5 px-3 text-[#a9b1d6] whitespace-nowrap">ASoC / Intel</td>
+              <td class="py-2.5 px-3 whitespace-nowrap">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=85c38c2fa17d" target="_blank" rel="noopener noreferrer">broonie/sound</a>
+              </td>
+              <td class="py-2.5 px-3 text-[#565f89] whitespace-nowrap">&mdash;</td>
+            </tr>
+            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
+              <td class="py-2.5 px-3 text-[#c0caf5] font-medium">thermal: intel: int340x: Fix potential shift overflow in ptc_mmio_write</td>
+              <td class="py-2.5 px-3 text-[#a9b1d6] whitespace-nowrap">Thermal / Intel int340x</td>
+              <td class="py-2.5 px-3 whitespace-nowrap">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git/commit/?id=8aa807a89dccdff4bcfc0cfc459b1ba714badbb6" target="_blank" rel="noopener noreferrer">rafael/linux-pm</a>
+              </td>
+              <td class="py-2.5 px-3 text-[#e0af68] whitespace-nowrap">&mdash; (rc7.2)</td>
+            </tr>
+            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
+              <td class="py-2.5 px-3 text-[#c0caf5] font-medium">thermal: intel: int340x: Check return value of ptc_create_groups()</td>
+              <td class="py-2.5 px-3 text-[#a9b1d6] whitespace-nowrap">Thermal / Intel int340x</td>
+              <td class="py-2.5 px-3 whitespace-nowrap">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git/commit/?id=8aa807a89dccdff4bcfc0cfc459b1ba714badbb6" target="_blank" rel="noopener noreferrer">rafael/linux-pm</a>
+              </td>
+              <td class="py-2.5 px-3 text-[#e0af68] whitespace-nowrap">&mdash; (rc7.2)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Reviewers -->
+    <section class="space-y-3">
+      <h2 class="text-xs uppercase tracking-wider text-[#565f89] font-medium border-b border-[#292e42] pb-2">
+        reviewers
+      </h2>
+      <ul class="space-y-2 text-sm text-[#a9b1d6] list-disc pl-5">
+        <li>
+          <strong class="text-white">Mark Brown</strong> <span class="text-[#565f89]">&mdash; ASoC maintainer</span>
+        </li>
+        <li>
+          <strong class="text-white">Cezary Rojewski</strong> <span class="text-[#565f89]">&mdash; Intel ASoC</span>
+        </li>
+        <li>
+          <strong class="text-white">Rafael J. Wysocki</strong> <span class="text-[#565f89]">&mdash; Thermal / PM maintainer</span>
+        </li>
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
