@@ -1,0 +1,112 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Projects — Aravind Anilraj (phi5ic)"
+  description="Systems engineering, distributed computing, and Linux kernel projects."
+>
+  <div class="space-y-10">
+    <header class="border-b border-[#292e42] pb-3">
+      <h1 class="text-xl font-bold text-white tracking-tight">Projects</h1>
+      <p class="text-xs text-[#565f89] mt-1">Systems software, distributed architecture, and hardware projects.</p>
+    </header>
+
+    <div class="space-y-8">
+      <!-- Nifsi -->
+      <article class="space-y-2 border-b border-[#292e42] pb-6">
+        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-semibold text-white">Nifsi</h2>
+            <span class="text-xs font-mono text-[#7aa2f7] bg-[#1a1b26] px-2 py-0.5 rounded border border-[#292e42]">Rust / Linux</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs">
+            <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer" class="text-[#7dcfff] hover:underline font-mono">
+              github.com/phi5ic/Nifsi &nearr;
+            </a>
+          </div>
+        </div>
+        <p class="text-sm text-[#a9b1d6] leading-relaxed">
+          An open-source distributed userspace operating system layer written in Rust for Linux clusters. Unifies heterogeneous physical machines into a shared FUSE filesystem, Raft-replicated metadata store, and ChaCha20-Poly1305 encrypted peer mesh. Features a novel <strong>HADR (Horizontal &amp; Diagonal Parity)</strong> erasure-coding storage engine with 4 KB slice-level homology repair and flat 3.0&times; write amplification.
+        </p>
+        <div class="flex items-center gap-4 text-xs pt-1">
+          <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer" class="text-[#7aa2f7] hover:text-[#7dcfff]">
+            &bull; GitHub Repository &nearr;
+          </a>
+          <a href="/posts/what-i-learned-trying-to-beat-xor/" class="text-[#7aa2f7] hover:text-[#7dcfff]">
+            &bull; Storage Architecture Deep Dive &rarr;
+          </a>
+          <a href="https://github.com/phi5ic/Nifsi/tree/main/benchmarks" target="_blank" rel="noopener noreferrer" class="text-[#7aa2f7] hover:text-[#7dcfff]">
+            &bull; Benchmarks &nearr;
+          </a>
+        </div>
+      </article>
+
+      <!-- Linux Kernel Patches -->
+      <article class="space-y-2 border-b border-[#292e42] pb-6">
+        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-semibold text-white">Linux Kernel Upstream Patches</h2>
+            <span class="text-xs font-mono text-[#f7768e] bg-[#1a1b26] px-2 py-0.5 rounded border border-[#292e42]">6 Merged</span>
+          </div>
+          <a href="/patches/" class="text-xs text-[#7dcfff] hover:underline font-mono">
+            view patch history &rarr;
+          </a>
+        </div>
+        <p class="text-sm text-[#a9b1d6] leading-relaxed">
+          Patches submitted and merged into the upstream Linux kernel across the <strong>ASoC / Intel sound driver</strong> and <strong>Thermal / int340x</strong> subsystems. Resolved critical MCLK hardware clock resource leaks on Intel Baytrail/Cherrytrail boards and fixed shift overflow / sysfs error propagation bugs. Reviewed and signed off by maintainers Mark Brown and Rafael J. Wysocki.
+        </p>
+        <div class="flex items-center gap-4 text-xs pt-1">
+          <a href="/patches/" class="text-[#7aa2f7] hover:text-[#7dcfff]">
+            &bull; Full Merged Patch Table &rarr;
+          </a>
+          <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/log/?qt=author&q=Aravind+Anilraj" target="_blank" rel="noopener noreferrer" class="text-[#7aa2f7] hover:text-[#7dcfff]">
+            &bull; git.kernel.org sound.git &nearr;
+          </a>
+        </div>
+      </article>
+
+      <!-- StabiSense -->
+      <article class="space-y-2 border-b border-[#292e42] pb-6">
+        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-semibold text-white">StabiSense</h2>
+            <span class="text-xs font-mono text-[#bb9af7] bg-[#1a1b26] px-2 py-0.5 rounded border border-[#292e42]">IEEE Thailand 2026</span>
+          </div>
+          <a href="https://github.com/phi5ic/StabiSense" target="_blank" rel="noopener noreferrer" class="text-xs text-[#7dcfff] hover:underline font-mono">
+            github.com/phi5ic/StabiSense &nearr;
+          </a>
+        </div>
+        <p class="text-sm text-[#a9b1d6] leading-relaxed">
+          Dynamic stabilization system designed for microchip sets during precision semiconductor manufacturing. Selected as a <strong>Myosa 5.0 Finalist</strong> and presented at the IEEE Thailand Biosensors Conference (2026).
+        </p>
+        <div class="flex items-center gap-4 text-xs pt-1">
+          <a href="https://github.com/phi5ic/StabiSense" target="_blank" rel="noopener noreferrer" class="text-[#7aa2f7] hover:text-[#7dcfff]">
+            &bull; GitHub Repository &nearr;
+          </a>
+        </div>
+      </article>
+
+      <!-- Qgis-Simulation -->
+      <article class="space-y-2">
+        <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-semibold text-white">Qgis-Simulation</h2>
+            <span class="text-xs font-mono text-[#9ece6a] bg-[#1a1b26] px-2 py-0.5 rounded border border-[#292e42]">1st Place Hackathon</span>
+          </div>
+          <a href="https://github.com/phi5ic/Qgis-Simulation" target="_blank" rel="noopener noreferrer" class="text-xs text-[#7dcfff] hover:underline font-mono">
+            github.com/phi5ic/Qgis-Simulation &nearr;
+          </a>
+        </div>
+        <p class="text-sm text-[#a9b1d6] leading-relaxed">
+          High-performance spatial analysis tool designed to detect water pipeline breaches by fusing machine learning terrain classification, Dijkstra's shortest-path flow algorithms, and Copernicus SAR satellite radar imagery. Awarded First Place at the Flowvision Hackathon (Brahma26, ASIET).
+        </p>
+        <div class="flex items-center gap-4 text-xs pt-1">
+          <a href="https://github.com/phi5ic/Qgis-Simulation" target="_blank" rel="noopener noreferrer" class="text-[#7aa2f7] hover:text-[#7dcfff]">
+            &bull; GitHub Repository &nearr;
+          </a>
+        </div>
+      </article>
+    </div>
+  </div>
+</BaseLayout>

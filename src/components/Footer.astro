@@ -3,9 +3,16 @@ const currentYear = new Date().getFullYear();
 ---
 
 <footer class="border-t border-[#292e42] mt-20 py-8 text-xs text-[#565f89]">
-  <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 px-4 sm:px-0">
-    <div>
-      &copy; {currentYear} Aravind Anilraj (phi5ic)
+  <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-0">
+    <div class="flex items-center gap-4">
+      <span>&copy; {currentYear} Aravind Anilraj (phi5ic)</span>
+      <span>&bull;</span>
+      <nav class="inline-flex items-center gap-3">
+        <a href="/posts/" class="text-[#7aa2f7] hover:text-[#7dcfff] no-underline">writing</a>
+        <a href="/projects/" class="text-[#7aa2f7] hover:text-[#7dcfff] no-underline">projects</a>
+        <a href="/patches/" class="text-[#7aa2f7] hover:text-[#7dcfff] no-underline">patches</a>
+        <a href="/about/" class="text-[#7aa2f7] hover:text-[#7dcfff] no-underline">about</a>
+      </nav>
     </div>
     <div class="flex items-center gap-4">
       <a href="https://github.com/phi5ic" target="_blank" rel="noopener noreferrer" class="no-underline hover:text-[#7aa2f7]">github</a>

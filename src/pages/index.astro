@@ -63,38 +63,67 @@ const posts = (await getCollection('blog')).sort(
 
     <!-- Projects -->
     <section>
-      <div class="border-b border-[#292e42] pb-2 mb-4">
+      <div class="flex items-center justify-between border-b border-[#292e42] pb-2 mb-4">
         <h2 class="text-xs uppercase tracking-wider text-[#565f89] font-medium">projects</h2>
+        <a href="/projects/" class="text-xs text-[#7aa2f7] hover:text-[#7dcfff] no-underline">all projects &rarr;</a>
       </div>
 
-      <ul class="space-y-3.5 text-sm">
+      <ul class="space-y-4 text-sm">
         <li>
-          <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff] no-underline">
-            Nifsi
-          </a>
-          <span class="text-[#7aa2f7] text-xs ml-1">(Rust)</span> &mdash;
-          <span class="text-[#a9b1d6]">Distributed userspace OS layer on Linux. Features slice-level homology repair and HADR storage engine.</span>
+          <div>
+            <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff] no-underline">
+              Nifsi
+            </a>
+            <span class="text-[#7aa2f7] text-xs ml-1">(Rust)</span>
+            <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer" class="text-xs text-[#565f89] hover:text-[#7dcfff] ml-2 font-mono">
+              [github &nearr;]
+            </a>
+          </div>
+          <p class="text-[#a9b1d6] mt-0.5 leading-relaxed">
+            Distributed userspace OS layer on Linux. Features slice-level homology repair and HADR storage engine.
+          </p>
         </li>
         <li>
-          <a href="https://github.com/phi5ic/StabiSense" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff] no-underline">
-            StabiSense
-          </a>
-          <span class="text-[#bb9af7] text-xs ml-1">(IEEE Thailand 2026)</span> &mdash;
-          <span class="text-[#a9b1d6]">Dynamic stabilization for chipsets during high-precision manufacturing. Finalist at Myosa 5.0.</span>
+          <div>
+            <a href="/patches/" class="font-bold text-white hover:text-[#7dcfff] no-underline">
+              Linux Kernel Patches
+            </a>
+            <span class="text-[#f7768e] text-xs ml-1">(6 merged)</span>
+            <a href="/patches/" class="text-xs text-[#565f89] hover:text-[#7dcfff] ml-2 font-mono">
+              [patches &rarr;]
+            </a>
+          </div>
+          <p class="text-[#a9b1d6] mt-0.5 leading-relaxed">
+            Upstream contributions to ASoC / Intel sound and Thermal / int340x subsystems. Reviewed by Mark Brown and Rafael J. Wysocki.
+          </p>
         </li>
         <li>
-          <a href="https://github.com/phi5ic/Qgis-Simulation" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff] no-underline">
-            Qgis-Simulation
-          </a>
-          <span class="text-[#9ece6a] text-xs ml-1">(1st Place Hackathon)</span> &mdash;
-          <span class="text-[#a9b1d6]">Water pipeline breach detection using ML, Dijkstra pathfinding, and Copernicus SAR satellite radar imagery.</span>
+          <div>
+            <a href="https://github.com/phi5ic/StabiSense" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff] no-underline">
+              StabiSense
+            </a>
+            <span class="text-[#bb9af7] text-xs ml-1">(IEEE Thailand 2026)</span>
+            <a href="https://github.com/phi5ic/StabiSense" target="_blank" rel="noopener noreferrer" class="text-xs text-[#565f89] hover:text-[#7dcfff] ml-2 font-mono">
+              [github &nearr;]
+            </a>
+          </div>
+          <p class="text-[#a9b1d6] mt-0.5 leading-relaxed">
+            Dynamic stabilization for chipsets during high-precision manufacturing. Finalist at Myosa 5.0.
+          </p>
         </li>
         <li>
-          <a href="/patches/" class="font-bold text-white hover:text-[#7dcfff] no-underline">
-            Linux Kernel Patches
-          </a>
-          <span class="text-[#f7768e] text-xs ml-1">(6 merged)</span> &mdash;
-          <span class="text-[#a9b1d6]">Upstream contributions to ASoC / Intel sound and Thermal / int340x subsystems. Reviewed by Mark Brown and Rafael J. Wysocki.</span>
+          <div>
+            <a href="https://github.com/phi5ic/Qgis-Simulation" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff] no-underline">
+              Qgis-Simulation
+            </a>
+            <span class="text-[#9ece6a] text-xs ml-1">(1st Place Hackathon)</span>
+            <a href="https://github.com/phi5ic/Qgis-Simulation" target="_blank" rel="noopener noreferrer" class="text-xs text-[#565f89] hover:text-[#7dcfff] ml-2 font-mono">
+              [github &nearr;]
+            </a>
+          </div>
+          <p class="text-[#a9b1d6] mt-0.5 leading-relaxed">
+            Water pipeline breach detection using ML, Dijkstra pathfinding, and Copernicus SAR satellite radar imagery.
+          </p>
         </li>
       </ul>
     </section>
