@@ -78,6 +78,70 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         }
       });
     </script>
+
+    <!-- Global BBS/Terminal Keyboard Shortcuts -->
+    <script is:inline>
+      (() => {
+        if (window._terminalShortcutsActive) return;
+        window._terminalShortcutsActive = true;
+
+        window.addEventListener('keydown', (e) => {
+          // Ignore if user is inside an input, textarea, or editable element
+          const target = e.target;
+          const tagName = target && target.tagName ? target.tagName.toUpperCase() : '';
+          if (tagName === 'INPUT' || tagName === 'TEXTAREA' || (target && target.isContentEditable)) {
+            return;
+          }
+          // Ignore if modifier keys are pressed
+          if (e.ctrlKey || e.altKey || e.metaKey) {
+            return;
+          }
+
+          // If welcome overlay is active, let it handle keypress
+          const overlay = document.getElementById('welcome-overlay');
+          if (overlay && !overlay.classList.contains('pointer-events-none') && overlay.style.display !== 'none') {
+            return;
+          }
+
+          const key = e.key.toLowerCase();
+          let targetUrl = null;
+          let openBlank = false;
+
+          if (e.key === 'Escape' || key === '0' || key === 'h') {
+            targetUrl = '/';
+          } else if (key === '1') {
+            targetUrl = '/about/';
+          } else if (key === '2') {
+            targetUrl = '/posts/';
+          } else if (key === '3') {
+            targetUrl = '/projects/';
+          } else if (key === '4') {
+            targetUrl = '/patches/';
+          } else if (key === 'g') {
+            targetUrl = 'https://github.com/phi5ic';
+            openBlank = true;
+          } else if (key === 'm') {
+            window.location.href = 'mailto:aravindanilraj0702@gmail.com';
+            return;
+          }
+
+          if (targetUrl) {
+            e.preventDefault();
+            if (openBlank) {
+              window.open(targetUrl, '_blank', 'noopener,noreferrer');
+            } else {
+              // Trigger client router navigation via clicking matching anchor tag
+              const link = document.querySelector(`a[href="${targetUrl}"]`);
+              if (link) {
+                link.click();
+              } else {
+                window.location.href = targetUrl;
+              }
+            }
+          }
+        });
+      })();
+    </script>
   </head>
   <body class="min-h-screen text-[#ecd2e8] bg-[#070308] selection:bg-[#ff2a85] selection:text-[#070308]">
     <WelcomeOverlay />

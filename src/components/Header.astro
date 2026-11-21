@@ -11,11 +11,11 @@ else if (cleanPath.startsWith('/patches')) sectionName = 'Patches';
 else if (cleanPath.startsWith('/about')) sectionName = 'About';
 
 const navItems = [
-  { label: 'writing', href: '/posts/' },
-  { label: 'projects', href: '/projects/' },
-  { label: 'patches', href: '/patches/' },
-  { label: 'about', href: '/about/' },
-  { label: 'github', href: 'https://github.com/phi5ic', external: true },
+  { key: '1', label: 'about', href: '/about/' },
+  { key: '2', label: 'writing', href: '/posts/' },
+  { key: '3', label: 'projects', href: '/projects/' },
+  { key: '4', label: 'patches', href: '/patches/' },
+  { key: 'G', label: 'github', href: 'https://github.com/phi5ic', external: true },
 ];
 ---
 
@@ -29,9 +29,9 @@ const navItems = [
       <span class="text-[#ecd2e8] group-hover:text-white capitalize">{sectionName}</span>
     </a>
 
-    <!-- Top nav & [ESC] -->
+    <!-- Top nav with hotkey badges & [ESC] -->
     <div class="flex items-center gap-2 sm:gap-4">
-      <nav class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
+      <nav class="flex flex-wrap items-center gap-1 sm:gap-1.5 text-xs">
         {navItems.map((item) => {
           const isActive = cleanPath === item.href.replace(/\/$/, '') || (item.href !== '/' && cleanPath.startsWith(item.href.replace(/\/$/, '')));
           return (
@@ -39,13 +39,14 @@ const navItems = [
               href={item.href}
               target={item.external ? '_blank' : undefined}
               rel={item.external ? 'noopener noreferrer' : undefined}
-              class={`px-1.5 py-0.5 rounded-sm border no-underline transition-all ${
+              class={`px-1.5 py-0.5 rounded-sm border no-underline transition-all flex items-center gap-1 ${
                 isActive
                   ? 'text-white border-[#ff2a85] bg-[#ff2a85]/20 font-bold'
                   : 'text-[#ff2a85] border-transparent hover:border-[#ff2a85]/40 hover:text-[#ff79c6] hover:bg-[#1a081e]'
               }`}
             >
-              [{item.label}]
+              <span class="text-[#854d80] text-[10px]">[{item.key}]</span>
+              <span>{item.label}</span>
             </a>
           );
         })}

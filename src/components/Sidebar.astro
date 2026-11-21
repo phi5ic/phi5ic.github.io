@@ -1,36 +1,42 @@
 ---
 const pathname = Astro.url.pathname;
+const cleanPath = pathname.replace(/\/$/, '');
 
 const navItems = [
   {
+    key: 'ESC',
     label: 'Home / The Sprawl',
     href: '/',
-    active: pathname === '/' || pathname === '',
+    active: cleanPath === '' || cleanPath === '/',
     icon: 'globe',
   },
   {
+    key: '1',
+    label: 'About',
+    href: '/about/',
+    active: cleanPath.startsWith('/about'),
+    icon: 'user',
+  },
+  {
+    key: '2',
     label: 'Writing',
     href: '/posts/',
-    active: pathname.startsWith('/posts'),
+    active: cleanPath.startsWith('/posts'),
     icon: 'file-text',
   },
   {
+    key: '3',
     label: 'Projects',
     href: '/projects/',
-    active: pathname.startsWith('/projects'),
+    active: cleanPath.startsWith('/projects'),
     icon: 'folder',
   },
   {
+    key: '4',
     label: 'Patches',
     href: '/patches/',
-    active: pathname.startsWith('/patches'),
+    active: cleanPath.startsWith('/patches'),
     icon: 'terminal',
-  },
-  {
-    label: 'About',
-    href: '/about/',
-    active: pathname.startsWith('/about'),
-    icon: 'user',
   },
 ];
 ---
@@ -40,7 +46,7 @@ const navItems = [
     {navItems.map((item) => (
       <a
         href={item.href}
-        title={item.label}
+        title={`[${item.key}] ${item.label}`}
         class={`w-8 h-8 flex items-center justify-center rounded-sm transition-all border ${
           item.active
             ? 'border-[#ff2a85] text-[#ff2a85] bg-[#ff2a85]/15 shadow-[0_0_8px_rgba(255,42,133,0.3)]'
@@ -52,6 +58,12 @@ const navItems = [
             <circle cx="12" cy="12" r="10" />
             <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
             <path d="M2 12h20" />
+          </svg>
+        )}
+        {item.icon === 'user' && (
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
           </svg>
         )}
         {item.icon === 'file-text' && (
@@ -73,12 +85,6 @@ const navItems = [
             <line x1="12" y1="19" x2="20" y2="19" />
           </svg>
         )}
-        {item.icon === 'user' && (
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
-        )}
       </a>
     ))}
 
@@ -88,21 +94,12 @@ const navItems = [
       href="https://github.com/phi5ic"
       target="_blank"
       rel="noopener noreferrer"
-      title="GitHub /phi5ic"
+      title="[G] GitHub /phi5ic"
       class="w-8 h-8 flex items-center justify-center rounded-sm transition-all border border-[#2a0e2e] text-[#854d80] hover:text-[#ff79c6] hover:border-[#ff2a85]/50 hover:bg-[#1a081e]"
     >
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
       </svg>
     </a>
-  </div>
-
-  <!-- Bottom Cyberspace rail items -->
-  <div class="flex flex-col items-center gap-2 w-full text-[10px] text-[#854d80]">
-    <span class="text-[#ff2a85] text-xs" title="listening to music :)">♫</span>
-    <span class="text-[9px] tracking-tighter text-[#854d80]">v0.98.1</span>
-    <div class="w-7 h-7 flex items-center justify-center border border-[#2a0e2e] text-[#ff2a85] text-[11px] font-bold rounded-sm bg-[#100613]" title="Mesh Terminal">
-      &gt;_
-    </div>
   </div>
 </aside>
