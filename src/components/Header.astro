@@ -1,14 +1,6 @@
 ---
 const pathname = Astro.url.pathname;
 const cleanPath = pathname.replace(/\/$/, '');
-const isHome = cleanPath === '' || cleanPath === '/';
-
-// Determine active section name
-let sectionName = 'The Sprawl';
-if (cleanPath.startsWith('/posts')) sectionName = 'Writing';
-else if (cleanPath.startsWith('/projects')) sectionName = 'Projects';
-else if (cleanPath.startsWith('/patches')) sectionName = 'Patches';
-else if (cleanPath.startsWith('/about')) sectionName = 'About';
 
 const navItems = [
   { key: '1', label: 'about', href: '/about/' },
@@ -21,44 +13,32 @@ const navItems = [
 
 <header class="border-b border-[#2a0e2e] py-3 px-4 sm:px-6 mb-8 text-xs select-none bg-[#070308]/90 sticky top-0 z-10 backdrop-blur-xs">
   <div class="max-w-4xl mx-auto flex items-center justify-between gap-3">
-    <!-- Cyberspace breadcrumb -->
-    <a href="/" class="inline-flex items-center gap-2 font-bold text-white tracking-wide no-underline hover:text-[#ff79c6] group">
-      <span class="text-[#ff2a85] font-normal">¶</span>
-      <span class="text-[#ff2a85] tracking-wider uppercase font-bold">PHI5IC</span>
-      <span class="text-[#854d80]">&rarr;</span>
-      <span class="text-[#ecd2e8] group-hover:text-white capitalize">{sectionName}</span>
+    <!-- Brand / Home link -->
+    <a href="/" class="inline-flex items-center gap-1.5 font-bold text-white tracking-wide no-underline hover:text-[#ff79c6]">
+      <span class="text-[#ff2a85]">&gt;</span>
+      <span>phi5ic</span>
     </a>
 
-    <!-- Top nav with hotkey badges & [ESC] -->
-    <div class="flex items-center gap-2 sm:gap-4">
-      <nav class="flex flex-wrap items-center gap-1 sm:gap-1.5 text-xs">
-        {navItems.map((item) => {
-          const isActive = cleanPath === item.href.replace(/\/$/, '') || (item.href !== '/' && cleanPath.startsWith(item.href.replace(/\/$/, '')));
-          return (
-            <a
-              href={item.href}
-              target={item.external ? '_blank' : undefined}
-              rel={item.external ? 'noopener noreferrer' : undefined}
-              class={`px-1.5 py-0.5 rounded-sm border no-underline transition-all flex items-center gap-1 ${
-                isActive
-                  ? 'text-white border-[#ff2a85] bg-[#ff2a85]/20 font-bold'
-                  : 'text-[#ff2a85] border-transparent hover:border-[#ff2a85]/40 hover:text-[#ff79c6] hover:bg-[#1a081e]'
-              }`}
-            >
-              <span class="text-[#854d80] text-[10px]">[{item.key}]</span>
-              <span>{item.label}</span>
-            </a>
-          );
-        })}
-      </nav>
-
-      <a
-        href="/"
-        title="Return to index [ESC]"
-        class="hidden sm:inline-block text-[11px] text-[#854d80] hover:text-[#ff2a85] border border-[#2a0e2e] hover:border-[#ff2a85]/50 px-1.5 py-0.5 rounded-sm no-underline"
-      >
-        [ESC]
-      </a>
-    </div>
+    <!-- Top nav with hotkey badges -->
+    <nav class="flex flex-wrap items-center gap-1 sm:gap-1.5 text-xs">
+      {navItems.map((item) => {
+        const isActive = cleanPath === item.href.replace(/\/$/, '') || (item.href !== '/' && cleanPath.startsWith(item.href.replace(/\/$/, '')));
+        return (
+          <a
+            href={item.href}
+            target={item.external ? '_blank' : undefined}
+            rel={item.external ? 'noopener noreferrer' : undefined}
+            class={`px-1.5 py-0.5 rounded-sm border no-underline transition-all flex items-center gap-1 ${
+              isActive
+                ? 'text-white border-[#ff2a85] bg-[#ff2a85]/20 font-bold'
+                : 'text-[#ff2a85] border-transparent hover:border-[#ff2a85]/40 hover:text-[#ff79c6] hover:bg-[#1a081e]'
+            }`}
+          >
+            <span class="text-[#854d80] text-[10px]">[{item.key}]</span>
+            <span>{item.label}</span>
+          </a>
+        );
+      })}
+    </nav>
   </div>
 </header>

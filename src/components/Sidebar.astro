@@ -4,36 +4,31 @@ const cleanPath = pathname.replace(/\/$/, '');
 
 const navItems = [
   {
-    key: 'ESC',
-    label: 'Home / The Sprawl',
+    label: 'Home',
     href: '/',
     active: cleanPath === '' || cleanPath === '/',
     icon: 'globe',
   },
   {
-    key: '1',
-    label: 'About',
+    label: '[1] About',
     href: '/about/',
     active: cleanPath.startsWith('/about'),
     icon: 'user',
   },
   {
-    key: '2',
-    label: 'Writing',
+    label: '[2] Writing',
     href: '/posts/',
     active: cleanPath.startsWith('/posts'),
     icon: 'file-text',
   },
   {
-    key: '3',
-    label: 'Projects',
+    label: '[3] Projects',
     href: '/projects/',
     active: cleanPath.startsWith('/projects'),
     icon: 'folder',
   },
   {
-    key: '4',
-    label: 'Patches',
+    label: '[4] Patches',
     href: '/patches/',
     active: cleanPath.startsWith('/patches'),
     icon: 'terminal',
@@ -46,7 +41,7 @@ const navItems = [
     {navItems.map((item) => (
       <a
         href={item.href}
-        title={`[${item.key}] ${item.label}`}
+        title={item.label}
         class={`w-8 h-8 flex items-center justify-center rounded-sm transition-all border ${
           item.active
             ? 'border-[#ff2a85] text-[#ff2a85] bg-[#ff2a85]/15 shadow-[0_0_8px_rgba(255,42,133,0.3)]'
