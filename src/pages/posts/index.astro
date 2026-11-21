@@ -11,10 +11,17 @@ const posts = (await getCollection('blog')).sort(
   title="Writing — Aravind Anilraj (phi5ic)"
   description="Technical writing and benchmarks on storage architecture, erasure coding, and Linux internals."
 >
-  <div class="space-y-8">
-    <header class="border-b border-[#292e42] pb-3">
-      <h1 class="text-xl font-bold text-white tracking-tight">Writing</h1>
-      <p class="text-xs text-[#565f89] mt-1">Deep dives, benchmarks, and notes on systems engineering.</p>
+  <div class="space-y-10 font-mono">
+    <!-- Header -->
+    <header class="border border-[#2a0e2e] bg-[#100613] p-4 sm:p-5 rounded-sm space-y-1">
+      <div class="text-[11px] text-[#854d80]">phi5ic@mesh ~ $ ls -la /posts/</div>
+      <h1 class="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
+        <span>Writing &amp; Postmortems</span>
+        <span class="text-[#ff2a85] text-xs font-normal">[{posts.length} entries]</span>
+      </h1>
+      <p class="text-xs text-[#c9a6c5]">
+        Architecture writeups, empirical benchmarks, and systems engineering postmortems.
+      </p>
     </header>
 
     <div class="space-y-6">
@@ -22,26 +29,32 @@ const posts = (await getCollection('blog')).sort(
         const postSlug = post.id.replace(/\.mdx?$/, '');
         const formattedDate = new Intl.DateTimeFormat('en-US', {
           year: 'numeric',
-          month: 'short',
-          day: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
         }).format(post.data.date);
 
         return (
-          <article class="space-y-1">
+          <article class="border border-[#2a0e2e] bg-[#100613]/70 p-4 rounded-sm space-y-2 group">
             <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
               <a
                 href={`/posts/${postSlug}/`}
-                class="text-base font-semibold text-white hover:text-[#7dcfff] no-underline"
+                class="text-sm sm:text-base font-bold text-white group-hover:text-[#ff79c6] no-underline"
               >
-                {post.data.title}
+                &gt; {post.data.title}
               </a>
-              <time datetime={post.data.date.toISOString()} class="text-xs text-[#565f89] shrink-0">
-                {formattedDate}
+              <time datetime={post.data.date.toISOString()} class="text-xs text-[#854d80] shrink-0 font-mono">
+                [{formattedDate}]
               </time>
             </div>
-            <p class="text-sm text-[#9aa5ce] leading-relaxed">
+            <p class="text-xs sm:text-sm text-[#ecd2e8] leading-relaxed">
               {post.data.excerpt}
             </p>
+            <div class="flex flex-wrap items-center gap-3 text-xs pt-2 border-t border-[#2a0e2e] text-[#ff2a85]">
+              <a href={`/posts/${postSlug}/`} class="hover:text-[#ff79c6]">[read article &rarr;]</a>
+              {post.data.categories && post.data.categories.length > 0 && (
+                <span class="text-[#854d80]">category: {post.data.categories.join('/')}</span>
+              )}
+            </div>
           </article>
         );
       })}

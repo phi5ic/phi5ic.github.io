@@ -6,137 +6,144 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   title="Kernel Contributions — Aravind Anilraj (phi5ic)"
   description="Patches submitted to the Linux kernel upstream across sound and thermal subsystems."
 >
-  <div class="space-y-10">
-    <header class="border-b border-[#292e42] pb-3">
-      <h1 class="text-xl font-bold text-white tracking-tight">Kernel Contributions</h1>
-      <p class="text-sm text-[#7aa2f7] mt-1">
-        Patches submitted and merged into the upstream Linux kernel.
+  <div class="space-y-10 font-mono">
+    <!-- Header -->
+    <header class="border border-[#2a0e2e] bg-[#100613] p-4 sm:p-5 rounded-sm space-y-1">
+      <div class="text-[11px] text-[#854d80]">phi5ic@kernel ~ $ git log --author="Aravind Anilraj"</div>
+      <h1 class="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
+        <span>Linux Kernel Contributions</span>
+        <span class="text-[#00ff66] text-xs font-normal">[6 merged upstream]</span>
+      </h1>
+      <p class="text-xs text-[#c9a6c5]">
+        Patches submitted, reviewed, and merged into upstream Linux across ASoC (sound) and Thermal subsystems.
       </p>
     </header>
 
     <!-- Verification / Archive links -->
-    <section class="bg-[#1a1b26] border border-[#292e42] rounded-md p-4 text-xs text-[#a9b1d6] space-y-2">
-      <div class="text-white font-semibold">Upstream Verification &amp; Public Archives:</div>
-      <div class="flex flex-wrap gap-x-5 gap-y-2 text-[#7aa2f7]">
-        <a href="https://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git/log/?qt=author&q=Aravind+Anilraj" target="_blank" rel="noopener noreferrer" class="hover:text-[#7dcfff]">
-          &bull; rafael/linux-pm.git author commits &nearr;
+    <section class="bg-[#100613] border border-[#2a0e2e] rounded-sm p-3.5 text-xs text-[#ecd2e8] space-y-2">
+      <div class="text-white font-bold flex items-center gap-2">
+        <span class="text-[#ff2a85]">&gt;</span> Upstream Verification &amp; Public Archives:
+      </div>
+      <div class="flex flex-wrap gap-x-4 gap-y-2 text-[#ff2a85]">
+        <a href="https://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git/log/?qt=author&q=Aravind+Anilraj" target="_blank" rel="noopener noreferrer" class="hover:text-[#ff79c6]">
+          [rafael/linux-pm.git author commits &nearr;]
         </a>
-        <a href="https://lore.kernel.org/all/?q=Aravind+Anilraj" target="_blank" rel="noopener noreferrer" class="hover:text-[#7dcfff]">
-          &bull; lore.kernel.org mail archive search &nearr;
+        <a href="https://lore.kernel.org/all/?q=Aravind+Anilraj" target="_blank" rel="noopener noreferrer" class="hover:text-[#ff79c6]">
+          [lore.kernel.org archive search &nearr;]
         </a>
       </div>
     </section>
 
     <!-- Merged Patches Table -->
-    <section class="space-y-4">
-      <div class="flex items-center justify-between border-b border-[#292e42] pb-2">
-        <h2 class="text-xs uppercase tracking-wider text-[#565f89] font-medium">
-          merged patches
+    <section class="space-y-3">
+      <div class="flex items-center justify-between border-b border-[#2a0e2e] pb-1.5">
+        <h2 class="text-xs uppercase tracking-wider text-[#ff2a85] font-bold">
+          -- MERGED UPSTREAM PATCHES --
         </h2>
-        <span class="text-xs text-[#9ece6a] font-mono">6 patches</span>
+        <span class="text-xs text-[#00ff66] font-mono">[6 patches]</span>
       </div>
 
-      <div class="overflow-x-auto border border-[#292e42] rounded">
-        <table class="w-full text-left text-sm border-collapse">
+      <div class="overflow-x-auto border border-[#2a0e2e] rounded-sm">
+        <table class="w-full text-left text-xs border-collapse">
           <thead>
-            <tr class="bg-[#1a1b26] border-b border-[#292e42] text-xs uppercase tracking-wider text-[#7aa2f7]">
-              <th class="py-2.5 px-3.5 font-semibold">Patch Description</th>
-              <th class="py-2.5 px-3.5 font-semibold">Subsystem</th>
-              <th class="py-2.5 px-3.5 font-semibold">Git Commit</th>
-              <th class="py-2.5 px-3.5 font-semibold">Lore Thread</th>
-              <th class="py-2.5 px-3.5 font-semibold whitespace-nowrap">Backport</th>
+            <tr class="bg-[#1a081e] border-b border-[#2a0e2e] text-[11px] uppercase tracking-wider text-[#ff79c6]">
+              <th class="py-2.5 px-3 font-semibold">Patch Description</th>
+              <th class="py-2.5 px-3 font-semibold">Subsystem</th>
+              <th class="py-2.5 px-3 font-semibold">Commit</th>
+              <th class="py-2.5 px-3 font-semibold">Lore Thread</th>
+              <th class="py-2.5 px-3 font-semibold whitespace-nowrap">Backport</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-[#292e42] text-xs sm:text-sm">
-            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
-              <td class="py-3 px-3.5 text-[#c0caf5] font-medium">ASoC: bytcr_rt5640: fix MCLK resource leak</td>
-              <td class="py-3 px-3.5 text-[#a9b1d6] whitespace-nowrap">ASoC / Intel</td>
-              <td class="py-3 px-3.5 whitespace-nowrap font-mono text-xs">
-                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=a02496a29463" target="_blank" rel="noopener noreferrer" class="text-[#7dcfff] hover:underline">
-                  a02496a29463 &nearr;
+          <tbody class="divide-y divide-[#2a0e2e] text-xs">
+            <tr class="hover:bg-[#150719] transition-colors">
+              <td class="py-2.5 px-3 text-[#ecd2e8] font-medium">ASoC: bytcr_rt5640: fix MCLK resource leak</td>
+              <td class="py-2.5 px-3 text-[#c9a6c5] whitespace-nowrap">ASoC / Intel</td>
+              <td class="py-2.5 px-3 whitespace-nowrap font-mono text-[11px]">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=a02496a29463" target="_blank" rel="noopener noreferrer" class="text-[#ff2a85] hover:text-[#ff79c6]">
+                  [a02496a29463 &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 whitespace-nowrap text-xs">
-                <a href="https://patch.msgid.link/20260401220507.23557-2-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#7aa2f7] hover:underline">
-                  lore &nearr;
+              <td class="py-2.5 px-3 whitespace-nowrap text-[11px]">
+                <a href="https://patch.msgid.link/20260401220507.23557-2-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#ff79c6] hover:underline">
+                  [lore &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 text-[#9ece6a] whitespace-nowrap font-mono text-xs">5.10+</td>
+              <td class="py-2.5 px-3 text-[#00ff66] whitespace-nowrap font-mono text-[11px]">5.10+</td>
             </tr>
-            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
-              <td class="py-3 px-3.5 text-[#c0caf5] font-medium">ASoC: bytcr_rt5651: fix MCLK resource leak</td>
-              <td class="py-3 px-3.5 text-[#a9b1d6] whitespace-nowrap">ASoC / Intel</td>
-              <td class="py-3 px-3.5 whitespace-nowrap font-mono text-xs">
-                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=b022e5c142ef" target="_blank" rel="noopener noreferrer" class="text-[#7dcfff] hover:underline">
-                  b022e5c142ef &nearr;
+            <tr class="hover:bg-[#150719] transition-colors">
+              <td class="py-2.5 px-3 text-[#ecd2e8] font-medium">ASoC: bytcr_rt5651: fix MCLK resource leak</td>
+              <td class="py-2.5 px-3 text-[#c9a6c5] whitespace-nowrap">ASoC / Intel</td>
+              <td class="py-2.5 px-3 whitespace-nowrap font-mono text-[11px]">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=b022e5c142ef" target="_blank" rel="noopener noreferrer" class="text-[#ff2a85] hover:text-[#ff79c6]">
+                  [b022e5c142ef &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 whitespace-nowrap text-xs">
-                <a href="https://patch.msgid.link/20260401220507.23557-3-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#7aa2f7] hover:underline">
-                  lore &nearr;
+              <td class="py-2.5 px-3 whitespace-nowrap text-[11px]">
+                <a href="https://patch.msgid.link/20260401220507.23557-3-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#ff79c6] hover:underline">
+                  [lore &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 text-[#9ece6a] whitespace-nowrap font-mono text-xs">5.10+</td>
+              <td class="py-2.5 px-3 text-[#00ff66] whitespace-nowrap font-mono text-[11px]">5.10+</td>
             </tr>
-            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
-              <td class="py-3 px-3.5 text-[#c0caf5] font-medium">ASoC: cht_bsw_rt5672: fix MCLK resource leak</td>
-              <td class="py-3 px-3.5 text-[#a9b1d6] whitespace-nowrap">ASoC / Intel</td>
-              <td class="py-3 px-3.5 whitespace-nowrap font-mono text-xs">
-                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=dced5a373a96" target="_blank" rel="noopener noreferrer" class="text-[#7dcfff] hover:underline">
-                  dced5a373a96 &nearr;
+            <tr class="hover:bg-[#150719] transition-colors">
+              <td class="py-2.5 px-3 text-[#ecd2e8] font-medium">ASoC: cht_bsw_rt5672: fix MCLK resource leak</td>
+              <td class="py-2.5 px-3 text-[#c9a6c5] whitespace-nowrap">ASoC / Intel</td>
+              <td class="py-2.5 px-3 whitespace-nowrap font-mono text-[11px]">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=dced5a373a96" target="_blank" rel="noopener noreferrer" class="text-[#ff2a85] hover:text-[#ff79c6]">
+                  [dced5a373a96 &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 whitespace-nowrap text-xs">
-                <a href="https://patch.msgid.link/20260401220507.23557-4-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#7aa2f7] hover:underline">
-                  lore &nearr;
+              <td class="py-2.5 px-3 whitespace-nowrap text-[11px]">
+                <a href="https://patch.msgid.link/20260401220507.23557-4-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#ff79c6] hover:underline">
+                  [lore &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 text-[#9ece6a] whitespace-nowrap font-mono text-xs">5.10+</td>
+              <td class="py-2.5 px-3 text-[#00ff66] whitespace-nowrap font-mono text-[11px]">5.10+</td>
             </tr>
-            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
-              <td class="py-3 px-3.5 text-[#c0caf5] font-medium">ASoC: Standardize MCLK error logs across RT boards</td>
-              <td class="py-3 px-3.5 text-[#a9b1d6] whitespace-nowrap">ASoC / Intel</td>
-              <td class="py-3 px-3.5 whitespace-nowrap font-mono text-xs">
-                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=85c38c2fa17d" target="_blank" rel="noopener noreferrer" class="text-[#7dcfff] hover:underline">
-                  85c38c2fa17d &nearr;
+            <tr class="hover:bg-[#150719] transition-colors">
+              <td class="py-2.5 px-3 text-[#ecd2e8] font-medium">ASoC: Standardize MCLK error logs across RT boards</td>
+              <td class="py-2.5 px-3 text-[#c9a6c5] whitespace-nowrap">ASoC / Intel</td>
+              <td class="py-2.5 px-3 whitespace-nowrap font-mono text-[11px]">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git/commit/?id=85c38c2fa17d" target="_blank" rel="noopener noreferrer" class="text-[#ff2a85] hover:text-[#ff79c6]">
+                  [85c38c2fa17d &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 whitespace-nowrap text-xs">
-                <a href="https://patch.msgid.link/20260401220507.23557-5-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#7aa2f7] hover:underline">
-                  lore &nearr;
+              <td class="py-2.5 px-3 whitespace-nowrap text-[11px]">
+                <a href="https://patch.msgid.link/20260401220507.23557-5-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#ff79c6] hover:underline">
+                  [lore &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 text-[#565f89] whitespace-nowrap">&mdash;</td>
+              <td class="py-2.5 px-3 text-[#854d80] whitespace-nowrap font-mono text-[11px]">&mdash;</td>
             </tr>
-            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
-              <td class="py-3 px-3.5 text-[#c0caf5] font-medium">thermal: intel: int340x: Fix potential shift overflow in ptc_mmio_write</td>
-              <td class="py-3 px-3.5 text-[#a9b1d6] whitespace-nowrap">Thermal / Intel int340x</td>
-              <td class="py-3 px-3.5 whitespace-nowrap font-mono text-xs">
-                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git/commit/?id=8aa807a89dccdff4bcfc0cfc459b1ba714badbb6" target="_blank" rel="noopener noreferrer" class="text-[#7dcfff] hover:underline">
-                  8aa807a89dcc &nearr;
+            <tr class="hover:bg-[#150719] transition-colors">
+              <td class="py-2.5 px-3 text-[#ecd2e8] font-medium">thermal: intel: int340x: Fix potential shift overflow in ptc_mmio_write</td>
+              <td class="py-2.5 px-3 text-[#c9a6c5] whitespace-nowrap">Thermal / Intel int340x</td>
+              <td class="py-2.5 px-3 whitespace-nowrap font-mono text-[11px]">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git/commit/?id=8aa807a89dccdff4bcfc0cfc459b1ba714badbb6" target="_blank" rel="noopener noreferrer" class="text-[#ff2a85] hover:text-[#ff79c6]">
+                  [8aa807a89dcc &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 whitespace-nowrap text-xs">
-                <a href="https://patch.msgid.link/20260329070642.10721-2-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#7aa2f7] hover:underline">
-                  lore &nearr;
+              <td class="py-2.5 px-3 whitespace-nowrap text-[11px]">
+                <a href="https://patch.msgid.link/20260329070642.10721-2-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#ff79c6] hover:underline">
+                  [lore &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 text-[#e0af68] whitespace-nowrap font-mono text-xs">&mdash; (rc7.2)</td>
+              <td class="py-2.5 px-3 text-[#e0af68] whitespace-nowrap font-mono text-[11px]">&mdash; (rc7.2)</td>
             </tr>
-            <tr class="hover:bg-[#1a1b26]/50 transition-colors">
-              <td class="py-3 px-3.5 text-[#c0caf5] font-medium">thermal: intel: int340x: Check return value of ptc_create_groups()</td>
-              <td class="py-3 px-3.5 text-[#a9b1d6] whitespace-nowrap">Thermal / Intel int340x</td>
-              <td class="py-3 px-3.5 whitespace-nowrap font-mono text-xs">
-                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git/commit/?id=8aa807a89dccdff4bcfc0cfc459b1ba714badbb6" target="_blank" rel="noopener noreferrer" class="text-[#7dcfff] hover:underline">
-                  8aa807a89dcc &nearr;
+            <tr class="hover:bg-[#150719] transition-colors">
+              <td class="py-2.5 px-3 text-[#ecd2e8] font-medium">thermal: intel: int340x: Check return value of ptc_create_groups()</td>
+              <td class="py-2.5 px-3 text-[#c9a6c5] whitespace-nowrap">Thermal / Intel int340x</td>
+              <td class="py-2.5 px-3 whitespace-nowrap font-mono text-[11px]">
+                <a href="https://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm.git/commit/?id=8aa807a89dccdff4bcfc0cfc459b1ba714badbb6" target="_blank" rel="noopener noreferrer" class="text-[#ff2a85] hover:text-[#ff79c6]">
+                  [8aa807a89dcc &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 whitespace-nowrap text-xs">
-                <a href="https://patch.msgid.link/20260329070642.10721-3-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#7aa2f7] hover:underline">
-                  lore &nearr;
+              <td class="py-2.5 px-3 whitespace-nowrap text-[11px]">
+                <a href="https://patch.msgid.link/20260329070642.10721-3-aravindanilraj0702@gmail.com" target="_blank" rel="noopener noreferrer" class="text-[#ff79c6] hover:underline">
+                  [lore &nearr;]
                 </a>
               </td>
-              <td class="py-3 px-3.5 text-[#e0af68] whitespace-nowrap font-mono text-xs">&mdash; (rc7.2)</td>
+              <td class="py-2.5 px-3 text-[#e0af68] whitespace-nowrap font-mono text-[11px]">&mdash; (rc7.2)</td>
             </tr>
           </tbody>
         </table>
@@ -144,19 +151,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </section>
 
     <!-- Reviewers & Maintainers -->
-    <section class="space-y-3">
-      <h2 class="text-xs uppercase tracking-wider text-[#565f89] font-medium border-b border-[#292e42] pb-2">
-        reviewers &amp; maintainers
+    <section class="space-y-2 border-t border-[#2a0e2e] pt-4">
+      <h2 class="text-xs uppercase tracking-wider text-[#854d80] font-bold">
+        -- REVIEWERS &amp; MAINTAINERS --
       </h2>
-      <ul class="space-y-2 text-sm text-[#a9b1d6] list-disc pl-5">
+      <ul class="space-y-1.5 text-xs text-[#c9a6c5]">
         <li>
-          <strong class="text-white">Mark Brown</strong> <span class="text-[#565f89]">&mdash; ASoC subsystem maintainer (Signed-off-by, committed to sound.git)</span>
+          <strong class="text-white">&gt; Mark Brown</strong> <span class="text-[#854d80]">&mdash; ASoC subsystem maintainer (Signed-off-by, committed to sound.git)</span>
         </li>
         <li>
-          <strong class="text-white">Cezary Rojewski</strong> <span class="text-[#565f89]">&mdash; Intel ASoC driver lead (Reviewed-by)</span>
+          <strong class="text-white">&gt; Cezary Rojewski</strong> <span class="text-[#854d80]">&mdash; Intel ASoC driver lead (Reviewed-by)</span>
         </li>
         <li>
-          <strong class="text-white">Rafael J. Wysocki</strong> <span class="text-[#565f89]">&mdash; Linux Power Management &amp; Thermal maintainer (Signed-off-by, committed to linux-pm.git)</span>
+          <strong class="text-white">&gt; Rafael J. Wysocki</strong> <span class="text-[#854d80]">&mdash; Linux Power Management &amp; Thermal maintainer (Signed-off-by, committed to linux-pm.git)</span>
         </li>
       </ul>
     </section>

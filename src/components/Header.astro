@@ -8,22 +8,23 @@ const navItems = [
 ];
 ---
 
-<header class="border-b border-[#292e42] py-4 mb-12">
-  <div class="max-w-2xl mx-auto flex items-center justify-between px-4 sm:px-0">
-    <a href="/" class="inline-flex items-center gap-2.5 font-bold text-white tracking-tight text-base no-underline hover:text-[#7dcfff] group">
-      <img src="/avatar.jpg" alt="Aravind Anilraj" class="w-6 h-6 rounded-full object-cover border border-[#292e42]" />
-      <span>phi5ic</span>
+<header class="border-b border-[#2a0e2e] py-4 mb-10 font-mono text-xs sm:text-sm">
+  <div class="max-w-3xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-0">
+    <a href="/" class="inline-flex items-center gap-2 font-bold text-white tracking-tight no-underline hover:text-[#ff79c6] group">
+      <span class="text-[#ff2a85]">&gt;</span>
+      <span class="text-white group-hover:text-[#ff79c6]">phi5ic</span>
+      <span class="text-[#854d80] text-xs font-normal">:: [linux / storage]</span>
     </a>
 
-    <nav class="flex items-center gap-5 text-sm">
+    <nav class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
       {navItems.map((item) => (
         <a
           href={item.href}
           target={item.external ? '_blank' : undefined}
           rel={item.external ? 'noopener noreferrer' : undefined}
-          class="text-[#7aa2f7] hover:text-[#7dcfff] no-underline"
+          class="text-[#ff2a85] hover:text-[#ff79c6] hover:bg-[#1a081e] px-1.5 py-0.5 rounded-sm border border-transparent hover:border-[#ff2a85]/40 no-underline transition-all"
         >
-          {item.label}
+          [{item.label}]
         </a>
       ))}
     </nav>

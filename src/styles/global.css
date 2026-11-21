@@ -1,81 +1,94 @@
 @import "tailwindcss";
-@import "@fontsource/inter/latin.css";
 @import "katex/dist/katex.min.css";
 
 :root {
-  --bg: #16161e;
-  --bg-subtle: #1a1b26;
-  --border: #292e42;
-  --text: #a9b1d6;
-  --text-heading: #c0caf5;
-  --text-muted: #565f89;
-  --accent: #7aa2f7;
+  --bg: #070308;
+  --bg-subtle: #100613;
+  --bg-surface: #17091b;
+  --border: #2a0e2e;
+  --border-bright: #ff2a85;
+  --border-glow: rgba(255, 42, 133, 0.4);
+  --text: #ecd2e8;
+  --text-heading: #ffffff;
+  --text-muted: #854d80;
+  --accent: #ff2a85;
+  --accent-pink: #ff007f;
+  --accent-bright: #ff79c6;
   --accent-cyan: #7dcfff;
+  --green: #00ff66;
 }
 
 html {
   background-color: var(--bg);
   color: var(--text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
 }
 
 body {
   background-color: var(--bg);
+  color: var(--text);
   min-height: 100vh;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+::selection {
+  background: #ff2a85;
+  color: #070308;
 }
 
 a {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-color: #3b4261;
+  text-decoration-color: #551c50;
   transition: text-decoration-color 0.15s ease, color 0.15s ease;
 }
 
 a:hover {
-  color: var(--accent-cyan);
-  text-decoration-color: var(--accent-cyan);
+  color: var(--accent-bright);
+  text-decoration-color: var(--accent-bright);
 }
 
-/* Monospace restricted only to code tags */
+/* Monospace code tags */
 code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.9em;
 }
 
 :not(pre) > code {
   background: var(--bg-subtle);
-  color: #7dcfff;
+  color: var(--accent-bright);
   padding: 0.15em 0.35em;
-  border-radius: 3px;
+  border-radius: 2px;
   border: 1px solid var(--border);
 }
 
-/* Pure minimalist prose */
+/* Cyber-Magenta Prose */
 .prose-minimal {
-  color: #c0caf5;
-  font-size: 1.05rem;
-  line-height: 1.75;
+  color: #ecd2e8;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .prose-minimal h2 {
-  font-size: 1.45rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #ffffff;
-  margin-top: 2.75rem;
+  margin-top: 2.5rem;
   margin-bottom: 0.75rem;
   padding-bottom: 0.3rem;
   border-bottom: 1px solid var(--border);
+  letter-spacing: -0.01em;
 }
 
 .prose-minimal h3 {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #7aa2f7;
-  margin-top: 2rem;
+  color: var(--accent);
+  margin-top: 1.75rem;
   margin-bottom: 0.5rem;
 }
 
@@ -85,15 +98,15 @@ code {
 
 .prose-minimal strong {
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .prose-minimal blockquote {
   margin: 1.5rem 0;
   padding: 0.5rem 1.25rem;
   border-left: 2px solid var(--accent);
-  color: #9aa5ce;
-  font-style: italic;
+  background: var(--bg-subtle);
+  color: #c9a6c5;
 }
 
 .prose-minimal blockquote p:last-child {
@@ -117,12 +130,12 @@ code {
   margin-bottom: 0.35rem;
 }
 
-/* Minimalist Tables */
+/* Monospace Tables */
 .prose-minimal table {
   width: 100%;
   margin: 1.75rem 0;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   display: block;
   overflow-x: auto;
 }
@@ -135,31 +148,31 @@ code {
 
 .prose-minimal th {
   border-top: 1px solid var(--border);
-  border-bottom: 2px solid var(--border);
+  border-bottom: 2px solid var(--border-bright);
   color: #ffffff;
   padding: 0.5rem 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-align: left;
 }
 
 .prose-minimal td {
   padding: 0.5rem 0.75rem;
   border-bottom: 1px solid var(--border);
-  color: #c0caf5;
+  color: #ecd2e8;
 }
 
 /* Pre / Code blocks */
 .prose-minimal pre {
   margin: 1.5rem 0;
   padding: 1rem;
-  border-radius: 4px;
-  background-color: #1a1b26 !important;
+  border-radius: 2px;
+  background-color: #0d0410 !important;
   border: 1px solid var(--border);
   overflow-x: auto;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
-/* Plain clean Figures */
+/* Figures */
 .prose-minimal figure {
   margin: 2rem 0;
 }
@@ -168,15 +181,14 @@ code {
   width: 100%;
   height: auto;
   display: block;
-  border-radius: 4px;
+  border-radius: 2px;
   border: 1px solid var(--border);
 }
 
 .prose-minimal figcaption {
   margin-top: 0.5rem;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
-  font-style: italic;
 }
 
 /* KaTeX equations */
@@ -187,5 +199,5 @@ code {
 }
 
 .katex {
-  color: #c0caf5;
+  color: #ecd2e8;
 }

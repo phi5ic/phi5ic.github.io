@@ -27,27 +27,27 @@ const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
   title={`${post.data.title} — Aravind Anilraj`}
   description={post.data.excerpt}
 >
-  <article class="space-y-8">
+  <article class="space-y-8 font-mono">
     <!-- Header -->
-    <header class="space-y-4 border-b border-[#292e42] pb-6">
-      <div class="mb-2">
-        <a href="/posts/" class="text-xs text-[#7aa2f7] hover:text-[#7dcfff] no-underline">
-          &larr; writing
+    <header class="space-y-3 border-b border-[#2a0e2e] pb-6">
+      <div class="mb-1 text-xs">
+        <a href="/posts/" class="text-[#ff2a85] hover:text-[#ff79c6] no-underline">
+          &larr; [back to writing]
         </a>
       </div>
 
-      <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-snug">
+      <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight leading-snug">
         {post.data.title}
       </h1>
 
-      <div class="flex items-center gap-3 text-xs text-[#565f89]">
-        <time datetime={post.data.date.toISOString()}>{formattedDate}</time>
+      <div class="flex flex-wrap items-center gap-3 text-xs text-[#854d80]">
+        <time datetime={post.data.date.toISOString()}>[{formattedDate}]</time>
         <span>&bull;</span>
         <span>{readTimeMinutes} min read</span>
         {post.data.categories && post.data.categories.length > 0 && (
           <>
             <span>&bull;</span>
-            <span class="text-[#7aa2f7]">{post.data.categories.join(', ')}</span>
+            <span class="text-[#ff79c6]">category: {post.data.categories.join(', ')}</span>
           </>
         )}
       </div>
@@ -59,15 +59,15 @@ const readTimeMinutes = Math.max(1, Math.round(wordCount / 200));
     </div>
 
     <!-- Minimalist Post Signoff -->
-    <footer class="pt-8 border-t border-[#292e42] text-xs text-[#565f89] space-y-3">
+    <footer class="pt-6 border-t border-[#2a0e2e] text-xs text-[#854d80] space-y-3">
       {post.data.tags && post.data.tags.length > 0 && (
         <div>
           tags: {post.data.tags.map((t: string) => `#${t}`).join(' ')}
         </div>
       )}
       <div class="pt-2">
-        <a href="/posts/" class="text-[#7aa2f7] hover:text-[#7dcfff] no-underline">
-          &larr; back to all posts
+        <a href="/posts/" class="text-[#ff2a85] hover:text-[#ff79c6] no-underline">
+          &larr; [back to writing]
         </a>
       </div>
     </footer>

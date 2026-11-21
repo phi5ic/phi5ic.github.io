@@ -8,26 +8,42 @@ const posts = (await getCollection('blog')).sort(
 ---
 
 <BaseLayout>
-  <div class="space-y-12">
-    <!-- Bio Intro -->
-    <section>
-      <h1 class="text-2xl font-bold text-white tracking-tight mb-1">
-        Aravind Anilraj
-      </h1>
-      <p class="text-xs text-[#7aa2f7] mb-5">
-        phi5ic &bull; systems engineer &bull; linux contributor
+  <div class="space-y-10 font-mono">
+    <!-- Terminal Header / Bio -->
+    <section class="space-y-3 border border-[#2a0e2e] bg-[#100613] p-4 sm:p-5 rounded-sm relative overflow-hidden">
+      <div class="text-[11px] text-[#854d80]">
+        phi5ic@mesh ~ $ finger aravind
+      </div>
+      <div>
+        <h1 class="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
+          <span>Aravind Anilraj</span>
+          <span class="text-[#ff2a85] text-xs font-normal">[phi5ic]</span>
+        </h1>
+        <p class="text-xs text-[#ff79c6] mt-0.5">
+          systems engineer &bull; linux kernel contributor &bull; storage researcher
+        </p>
+      </div>
+
+      <p class="text-xs sm:text-sm text-[#ecd2e8] leading-relaxed pt-1">
+        I break things to figure out how they work. I hate repetitive college lectures and exams, so I put myself through technical hardships instead: writing distributed storage engines from scratch in Rust (<a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer" class="text-[#ff2a85] hover:text-[#ff79c6]">Nifsi</a>), patching the Linux kernel (<a href="/patches/" class="text-[#ff2a85] hover:text-[#ff79c6]">ASoC, Thermal</a>), and wiring hardware clusters.
       </p>
 
-      <p class="text-base text-[#c0caf5] leading-relaxed">
-        I contribute Linux kernel patches (<a href="/patches/">ASoC, Thermal</a>) and build <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer">Nifsi</a>, an open-source distributed userspace operating system layer in Rust. I write down what I learn about storage architecture, erasure coding, consensus, and OS internals while building things.
-      </p>
+      <div class="pt-2 text-[11px] text-[#854d80] flex flex-wrap gap-x-4 gap-y-1 border-t border-[#2a0e2e]">
+        <span>status: hacking on hadr-v2</span>
+        <span>&bull;</span>
+        <span>stack: rust / c / linux / arm</span>
+        <span>&bull;</span>
+        <span>host: arch linux</span>
+      </div>
     </section>
 
-    <!-- Recent Writing -->
-    <section>
-      <div class="flex items-center justify-between border-b border-[#292e42] pb-2 mb-4">
-        <h2 class="text-xs uppercase tracking-wider text-[#565f89] font-medium">writing</h2>
-        <a href="/posts/" class="text-xs text-[#7aa2f7] hover:text-[#7dcfff] no-underline">all posts &rarr;</a>
+    <!-- Writing / Postmortems -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between border-b border-[#2a0e2e] pb-1.5">
+        <h2 class="text-xs uppercase tracking-wider text-[#ff2a85] font-bold">
+          -- [01] WRITING &amp; POSTMORTEMS --
+        </h2>
+        <a href="/posts/" class="text-xs text-[#ff79c6] hover:underline no-underline">[all posts &rarr;]</a>
       </div>
 
       <div class="space-y-6">
@@ -35,26 +51,31 @@ const posts = (await getCollection('blog')).sort(
           const postSlug = post.id.replace(/\.mdx?$/, '');
           const formattedDate = new Intl.DateTimeFormat('en-US', {
             year: 'numeric',
-            month: 'short',
-            day: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
           }).format(post.data.date);
 
           return (
-            <article class="space-y-1">
+            <article class="space-y-1.5 group">
               <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
                 <a
                   href={`/posts/${postSlug}/`}
-                  class="text-base font-semibold text-white hover:text-[#7dcfff] no-underline"
+                  class="text-sm sm:text-base font-bold text-white group-hover:text-[#ff79c6] no-underline"
                 >
-                  {post.data.title}
+                  &gt; {post.data.title}
                 </a>
-                <time datetime={post.data.date.toISOString()} class="text-xs text-[#565f89] shrink-0">
-                  {formattedDate}
+                <time datetime={post.data.date.toISOString()} class="text-xs text-[#854d80] shrink-0 font-mono">
+                  [{formattedDate}]
                 </time>
               </div>
-              <p class="text-sm text-[#9aa5ce] leading-relaxed">
+              <p class="text-xs sm:text-sm text-[#c9a6c5] leading-relaxed">
                 {post.data.excerpt}
               </p>
+              <div class="text-[11px] text-[#854d80] flex gap-2">
+                <span>topic: {post.data.categories ? post.data.categories.join('/') : 'systems'}</span>
+                <span>&bull;</span>
+                <a href={`/posts/${postSlug}/`} class="text-[#ff2a85] hover:text-[#ff79c6]">read post &rarr;</a>
+              </div>
             </article>
           );
         })}
@@ -62,87 +83,82 @@ const posts = (await getCollection('blog')).sort(
     </section>
 
     <!-- Projects -->
-    <section>
-      <div class="flex items-center justify-between border-b border-[#292e42] pb-2 mb-4">
-        <h2 class="text-xs uppercase tracking-wider text-[#565f89] font-medium">projects</h2>
-        <a href="/projects/" class="text-xs text-[#7aa2f7] hover:text-[#7dcfff] no-underline">all projects &rarr;</a>
+    <section class="space-y-4">
+      <div class="flex items-center justify-between border-b border-[#2a0e2e] pb-1.5">
+        <h2 class="text-xs uppercase tracking-wider text-[#ff2a85] font-bold">
+          -- [02] ACTIVE PROJECTS --
+        </h2>
+        <a href="/projects/" class="text-xs text-[#ff79c6] hover:underline no-underline">[all projects &rarr;]</a>
       </div>
 
-      <ul class="space-y-4 text-sm">
-        <li>
-          <div>
-            <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff] no-underline">
-              Nifsi
+      <ul class="space-y-4 text-xs sm:text-sm">
+        <li class="border border-[#2a0e2e] bg-[#100613]/60 p-3 rounded-sm space-y-1">
+          <div class="flex flex-wrap items-baseline justify-between gap-1">
+            <div>
+              <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#ff79c6] no-underline">
+                * Nifsi
+              </a>
+              <span class="text-[#ff2a85] text-xs ml-1">[Rust]</span>
+            </div>
+            <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer" class="text-xs text-[#ff79c6] hover:underline font-mono">
+              [github.com/phi5ic/Nifsi &nearr;]
             </a>
-            <span class="text-[#7aa2f7] text-xs ml-1">(Rust)</span>
-            <a href="https://github.com/phi5ic/Nifsi" target="_blank" rel="noopener noreferrer" class="text-xs text-[#565f89] hover:text-[#7dcfff] ml-2 font-mono">
+          </div>
+          <p class="text-[#c9a6c5] leading-relaxed text-xs sm:text-sm">
+            Distributed userspace OS layer on Linux. Features sub-packet slice repair (HADR-v2), 3.0&times; bounded write amplification, and Raft state replication.
+          </p>
+        </li>
+
+        <li class="border border-[#2a0e2e] bg-[#100613]/60 p-3 rounded-sm space-y-1">
+          <div class="flex flex-wrap items-baseline justify-between gap-1">
+            <div>
+              <a href="/patches/" class="font-bold text-white hover:text-[#ff79c6] no-underline">
+                * Linux Kernel Patches
+              </a>
+              <span class="text-[#00ff66] text-xs ml-1">[6 merged upstream]</span>
+            </div>
+            <a href="/patches/" class="text-xs text-[#ff79c6] hover:underline font-mono">
+              [view patch archives &rarr;]
+            </a>
+          </div>
+          <p class="text-[#c9a6c5] leading-relaxed text-xs sm:text-sm">
+            Upstream contributions to ASoC / Intel sound and Thermal / int340x subsystems. Resolved critical hardware clock resource leaks. Reviewed by Mark Brown and Rafael J. Wysocki.
+          </p>
+        </li>
+
+        <li class="border border-[#2a0e2e] bg-[#100613]/60 p-3 rounded-sm space-y-1">
+          <div class="flex flex-wrap items-baseline justify-between gap-1">
+            <div>
+              <a href="https://github.com/phi5ic/StabiSense" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#ff79c6] no-underline">
+                * StabiSense
+              </a>
+              <span class="text-[#bb9af7] text-xs ml-1">[IEEE Thailand 2026]</span>
+            </div>
+            <a href="https://github.com/phi5ic/StabiSense" target="_blank" rel="noopener noreferrer" class="text-xs text-[#ff79c6] hover:underline font-mono">
               [github &nearr;]
             </a>
           </div>
-          <p class="text-[#a9b1d6] mt-0.5 leading-relaxed">
-            Distributed userspace OS layer on Linux. Features slice-level homology repair and HADR storage engine.
-          </p>
-        </li>
-        <li>
-          <div>
-            <a href="/patches/" class="font-bold text-white hover:text-[#7dcfff] no-underline">
-              Linux Kernel Patches
-            </a>
-            <span class="text-[#f7768e] text-xs ml-1">(6 merged)</span>
-            <a href="/patches/" class="text-xs text-[#565f89] hover:text-[#7dcfff] ml-2 font-mono">
-              [patches &rarr;]
-            </a>
-          </div>
-          <p class="text-[#a9b1d6] mt-0.5 leading-relaxed">
-            Upstream contributions to ASoC / Intel sound and Thermal / int340x subsystems. Reviewed by Mark Brown and Rafael J. Wysocki.
-          </p>
-        </li>
-        <li>
-          <div>
-            <a href="https://github.com/phi5ic/StabiSense" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff] no-underline">
-              StabiSense
-            </a>
-            <span class="text-[#bb9af7] text-xs ml-1">(IEEE Thailand 2026)</span>
-            <a href="https://github.com/phi5ic/StabiSense" target="_blank" rel="noopener noreferrer" class="text-xs text-[#565f89] hover:text-[#7dcfff] ml-2 font-mono">
-              [github &nearr;]
-            </a>
-          </div>
-          <p class="text-[#a9b1d6] mt-0.5 leading-relaxed">
+          <p class="text-[#c9a6c5] leading-relaxed text-xs sm:text-sm">
             Dynamic stabilization for chipsets during high-precision manufacturing. Finalist at Myosa 5.0.
-          </p>
-        </li>
-        <li>
-          <div>
-            <a href="https://github.com/phi5ic/Qgis-Simulation" target="_blank" rel="noopener noreferrer" class="font-bold text-white hover:text-[#7dcfff] no-underline">
-              Qgis-Simulation
-            </a>
-            <span class="text-[#9ece6a] text-xs ml-1">(1st Place Hackathon)</span>
-            <a href="https://github.com/phi5ic/Qgis-Simulation" target="_blank" rel="noopener noreferrer" class="text-xs text-[#565f89] hover:text-[#7dcfff] ml-2 font-mono">
-              [github &nearr;]
-            </a>
-          </div>
-          <p class="text-[#a9b1d6] mt-0.5 leading-relaxed">
-            Water pipeline breach detection using ML, Dijkstra pathfinding, and Copernicus SAR satellite radar imagery.
           </p>
         </li>
       </ul>
     </section>
 
     <!-- Connect -->
-    <section>
-      <div class="border-b border-[#292e42] pb-2 mb-4">
-        <h2 class="text-xs uppercase tracking-wider text-[#565f89] font-medium">connect</h2>
+    <section class="space-y-2 border-t border-[#2a0e2e] pt-4">
+      <div class="text-xs text-[#854d80] uppercase tracking-wider font-bold">
+        -- [03] TERMINAL CHANNELS --
       </div>
-
-      <p class="text-sm text-[#9aa5ce] leading-relaxed mb-3">
-        Feel free to inspect my code, discuss distributed storage, or get in touch:
+      <p class="text-xs text-[#c9a6c5] leading-relaxed">
+        Feel free to inspect my repositories, read the benchmarks, or get in touch:
       </p>
-      <div class="flex items-center gap-4 text-sm">
-        <a href="https://github.com/phi5ic" target="_blank" rel="noopener noreferrer" class="hover:text-[#7dcfff]">github</a>
-        <span class="text-[#292e42]">&bull;</span>
-        <a href="https://www.linkedin.com/in/aravind-anilraj/" target="_blank" rel="noopener noreferrer" class="hover:text-[#7aa2f7]">linkedin</a>
-        <span class="text-[#292e42]">&bull;</span>
-        <a href="mailto:aravindanilraj0702@gmail.com" class="hover:text-[#bb9af7]">email</a>
+      <div class="flex flex-wrap items-center gap-3 text-xs pt-1">
+        <a href="https://github.com/phi5ic" target="_blank" rel="noopener noreferrer" class="text-[#ff2a85] hover:text-[#ff79c6]">[github]</a>
+        <span>&bull;</span>
+        <a href="https://www.linkedin.com/in/aravind-anilraj/" target="_blank" rel="noopener noreferrer" class="text-[#ff2a85] hover:text-[#ff79c6]">[linkedin]</a>
+        <span>&bull;</span>
+        <a href="mailto:aravindanilraj0702@gmail.com" class="text-[#ff2a85] hover:text-[#ff79c6]">[email]</a>
       </div>
     </section>
   </div>

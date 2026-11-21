@@ -2,6 +2,7 @@
 import { ClientRouter } from 'astro:transitions';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import WelcomeOverlay from '../components/WelcomeOverlay.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -74,9 +75,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       });
     </script>
   </head>
-  <body class="flex flex-col min-h-screen text-[#a9b1d6] bg-[#16161e]">
+  <body class="flex flex-col min-h-screen text-[#ecd2e8] bg-[#070308] font-mono selection:bg-[#ff2a85] selection:text-[#070308]">
+    <WelcomeOverlay />
     <Header />
-    <main class="flex-grow max-w-2xl w-full mx-auto px-4 sm:px-0">
+    <main class="flex-grow max-w-3xl w-full mx-auto px-4 sm:px-6">
       <slot />
     </main>
     <Footer />

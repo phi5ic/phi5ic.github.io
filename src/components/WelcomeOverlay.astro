@@ -1,0 +1,68 @@
+---
+// WelcomeOverlay.astro - Displays a minimalist ASCII welcome :) banner on the user's first visit.
+---
+
+<div
+  id="welcome-overlay"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-[#070308] select-none cursor-pointer transition-opacity duration-700"
+  style="display: none;"
+>
+  <div class="text-center px-4 space-y-4">
+    <pre class="font-mono text-[10px] sm:text-xs md:text-sm leading-tight text-[#ff2a85] drop-shadow-[0_0_12px_rgba(255,42,133,0.7)] animate-pulse overflow-x-auto">
+{`                  _                             
+  __ __ _____ ___| |___ ___  _ __  ___      :)  
+  \\ V  V / -_) _/| / _ / _ \\| '  \\/ -_)         
+   \\_/\\_/\\___/\\__|_|\\___\\___/|_|_|_\\___/        `}
+    </pre>
+    <div class="text-[11px] font-mono text-[#854d80] tracking-wider uppercase">
+      [ click or press any key to enter ]
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    const overlay = document.getElementById('welcome-overlay');
+    if (!overlay) return;
+
+    // Check if user has already visited
+    try {
+      if (localStorage.getItem('phi5ic_welcomed')) {
+        return;
+      }
+    } catch (e) {
+      return;
+    }
+
+    // First visit: show overlay
+    overlay.style.display = 'flex';
+
+    let dismissed = false;
+    function dismiss() {
+      if (dismissed) return;
+      dismissed = true;
+      try {
+        localStorage.setItem('phi5ic_welcomed', '1');
+      } catch (e) {}
+
+      overlay.style.opacity = '0';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 700);
+    }
+
+    // Auto dismiss after 1.8 seconds (smooth fade in, hold, fade out)
+    const timer = setTimeout(dismiss, 1800);
+
+    // Dismiss immediately on click or keypress
+    overlay.addEventListener('click', () => {
+      clearTimeout(timer);
+      dismiss();
+    });
+
+    window.addEventListener('keydown', () => {
+      clearTimeout(timer);
+      dismiss();
+    }, { once: true });
+  })();
+</script>
