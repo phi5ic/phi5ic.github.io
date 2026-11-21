@@ -29,6 +29,11 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="shortcut icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
 
+    <!-- Google Fonts Preconnect for DotGothic16 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet" />
+
     <!-- SEO -->
     <title>{title}</title>
     <meta name="title" content={title} />
