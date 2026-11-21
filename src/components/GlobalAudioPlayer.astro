@@ -1,0 +1,436 @@
+---
+---
+
+<div
+  id="global-audio-player"
+  transition:persist
+  class="fixed bottom-0 left-0 right-0 z-40 bg-[#070308]/95 border-t border-[#2a0e2e] backdrop-blur-md select-none text-xs font-mono py-2 px-3 sm:px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.8)]"
+>
+  <div class="max-w-5xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+    <!-- Left: Track info -->
+    <div class="flex items-center gap-2 min-w-0 max-w-[140px] sm:max-w-[220px] shrink-0">
+      <div id="player-disc" class="w-6 h-6 shrink-0 border border-[#ff2a85]/50 rounded-full flex items-center justify-center text-[10px] text-[#ff2a85] bg-[#100613]">
+        ♫
+      </div>
+      <div class="min-w-0 leading-tight">
+        <div id="player-title" class="text-white text-xs font-bold truncate">Fall Children</div>
+        <div id="player-artist" class="text-[#854d80] text-[11px] truncate">AFI</div>
+      </div>
+    </div>
+
+    <!-- Center-Left: Transport Controls -->
+    <div class="flex items-center gap-1 shrink-0 text-[#ff2a85]">
+      <button
+        id="player-prev"
+        type="button"
+        title="Previous Track"
+        class="w-7 h-7 flex items-center justify-center rounded-sm hover:bg-[#ff2a85]/15 hover:text-white cursor-pointer transition-colors"
+      >
+        |&lt;
+      </button>
+      <button
+        id="player-play"
+        type="button"
+        title="Play / Pause"
+        class="w-7 h-7 flex items-center justify-center rounded-sm bg-[#ff2a85]/15 border border-[#ff2a85]/40 text-[#ff2a85] hover:text-white hover:bg-[#ff2a85]/30 cursor-pointer transition-colors font-bold"
+      >
+        ▶
+      </button>
+      <button
+        id="player-next"
+        type="button"
+        title="Next Track"
+        class="w-7 h-7 flex items-center justify-center rounded-sm hover:bg-[#ff2a85]/15 hover:text-white cursor-pointer transition-colors"
+      >
+        &gt;|
+      </button>
+    </div>
+
+    <!-- Center: Time & Dither Scrubber -->
+    <div class="flex items-center gap-2 flex-1 min-w-[100px]">
+      <span id="player-current-time" class="text-[11px] text-[#854d80] tabular-nums shrink-0">0:00</span>
+      
+      <!-- Dithered Scrubber Bar -->
+      <div
+        id="player-scrubber-track"
+        class="relative flex-1 h-3.5 border border-[#2a0e2e] bg-[#0d0410] rounded-xs overflow-hidden cursor-pointer group"
+        title="Click to seek"
+      >
+        <!-- Dither Halftone Background -->
+        <div class="absolute inset-0 dither-pattern opacity-40 group-hover:opacity-60 transition-opacity"></div>
+        
+        <!-- Filled Active Progress -->
+        <div
+          id="player-progress-fill"
+          class="absolute top-0 bottom-0 left-0 bg-[#ff2a85] transition-[width] duration-100 relative"
+          style="width: 0%;"
+        >
+          <!-- Playhead Thumb -->
+          <div class="absolute right-0 top-0 bottom-0 w-1 bg-white shadow-[0_0_6px_#ff2a85]"></div>
+        </div>
+      </div>
+
+      <span id="player-duration" class="text-[11px] text-[#854d80] tabular-nums shrink-0">0:00</span>
+    </div>
+
+    <!-- Right: Actions & Volume & Close -->
+    <div class="flex items-center gap-1 sm:gap-2 shrink-0 text-[#854d80]">
+      <!-- Volume Toggle -->
+      <button
+        id="player-mute"
+        type="button"
+        title="Mute / Unmute"
+        class="w-6 h-6 flex items-center justify-center hover:text-[#ff2a85] cursor-pointer"
+      >
+        🔊
+      </button>
+
+      <!-- Queue / Playlist Button -->
+      <button
+        id="player-queue-btn"
+        type="button"
+        title="Playlist Queue"
+        class="w-6 h-6 flex items-center justify-center hover:text-[#ff2a85] cursor-pointer"
+      >
+        ☰
+      </button>
+
+      <!-- External YouTube Link -->
+      <a
+        id="player-yt-link"
+        href="https://www.youtube.com/watch?v=WP9G8NrBqSs"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Open in YouTube"
+        class="w-6 h-6 flex items-center justify-center hover:text-[#ff2a85] no-underline"
+      >
+        ↗
+      </a>
+
+      <!-- Minimize / Hide Button -->
+      <button
+        id="player-toggle-hide"
+        type="button"
+        title="Minimize Player"
+        class="w-6 h-6 flex items-center justify-center hover:text-white cursor-pointer ml-1 text-xs"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+
+  <!-- Queue Popup Panel -->
+  <div
+    id="player-queue-panel"
+    class="hidden max-w-5xl mx-auto mt-2 pt-2 border-t border-[#2a0e2e] flex flex-col gap-1.5 max-h-48 overflow-y-auto text-xs"
+  >
+    <div class="flex items-center justify-between text-[11px] text-[#854d80] pb-1">
+      <span>// QUEUE BUFFER ({">"} select track)</span>
+      <span class="text-[#ff2a85]">[loop enabled]</span>
+    </div>
+    <div id="player-queue-list" class="space-y-1"></div>
+  </div>
+
+  <!-- Hidden YouTube Iframe Host -->
+  <div id="yt-player-container" class="hidden"></div>
+</div>
+
+<style>
+  /* Retro 2x2 Halftone Checkerboard Dither */
+  .dither-pattern {
+    background-image: 
+      linear-gradient(45deg, #ff2a85 25%, transparent 25%), 
+      linear-gradient(-45deg, #ff2a85 25%, transparent 25%), 
+      linear-gradient(45deg, transparent 75%, #ff2a85 75%), 
+      linear-gradient(-45deg, transparent 75%, #ff2a85 75%);
+    background-size: 4px 4px;
+    background-position: 0 0, 0 2px, 2px -2px, -2px 0px;
+  }
+
+  @keyframes spin-disc {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .disc-spinning {
+    animation: spin-disc 3s linear infinite;
+  }
+</style>
+
+<script is:inline>
+  (() => {
+    // Prevent duplicate binding on Astro navigation
+    if (window._musicPlayerInitialized) return;
+    window._musicPlayerInitialized = true;
+
+    // Default Playlist
+    const playlist = [
+      {
+        id: 'WP9G8NrBqSs',
+        title: 'Fall Children',
+        artist: 'AFI',
+        tag: 'horror punk',
+        cover: 'https://img.youtube.com/vi/WP9G8NrBqSs/hqdefault.jpg',
+      },
+      {
+        id: 'lTRiuFIWV54',
+        title: 'Headlock',
+        artist: 'Snail Mail',
+        tag: 'indie rock',
+        cover: 'https://img.youtube.com/vi/lTRiuFIWV54/hqdefault.jpg',
+      },
+      {
+        id: 'dQw4w9WgXcQ',
+        title: 'Never Gonna Give You Up',
+        artist: 'Rick Astley',
+        tag: 'classic',
+        cover: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+      }
+    ];
+
+    let currentIndex = 0;
+    let ytPlayer = null;
+    let isPlaying = false;
+    let isMuted = false;
+    let pollInterval = null;
+    let ytApiLoaded = false;
+
+    function formatTime(seconds) {
+      if (!seconds || isNaN(seconds)) return '0:00';
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function updateTrackUI() {
+      const track = playlist[currentIndex];
+      if (!track) return;
+      const titleEl = document.getElementById('player-title');
+      const artistEl = document.getElementById('player-artist');
+      const linkEl = document.getElementById('player-yt-link');
+      if (titleEl) titleEl.textContent = track.title;
+      if (artistEl) artistEl.textContent = track.artist;
+      if (linkEl) linkEl.href = `https://www.youtube.com/watch?v=${track.id}`;
+      renderQueue();
+    }
+
+    function renderQueue() {
+      const listEl = document.getElementById('player-queue-list');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+      playlist.forEach((track, idx) => {
+        const item = document.createElement('div');
+        item.className = `flex items-center justify-between p-1.5 rounded-xs cursor-pointer border ${
+          idx === currentIndex
+            ? 'border-[#ff2a85] bg-[#ff2a85]/15 text-white font-bold'
+            : 'border-[#2a0e2e] bg-[#100613]/50 text-[#ecd2e8] hover:border-[#ff2a85]/40 hover:text-white'
+        }`;
+        item.innerHTML = `
+          <div class="flex items-center gap-2 truncate">
+            <span class="text-[#ff2a85] text-[10px]">${idx === currentIndex ? '▶' : `${idx + 1}.`}</span>
+            <span class="truncate">${track.title}</span>
+            <span class="text-[#854d80] text-[11px] truncate">— ${track.artist}</span>
+          </div>
+          <span class="text-[10px] text-[#854d80] border border-[#2a0e2e] px-1 py-0.2 shrink-0">[${track.tag || 'audio'}]</span>
+        `;
+        item.addEventListener('click', () => {
+          playTrackAtIndex(idx);
+        });
+        listEl.appendChild(item);
+      });
+    }
+
+    function initYouTube() {
+      if (ytApiLoaded) return;
+      ytApiLoaded = true;
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+
+    window.onYouTubeIframeAPIReady = () => {
+      const track = playlist[currentIndex];
+      ytPlayer = new YT.Player('yt-player-container', {
+        height: '0',
+        width: '0',
+        videoId: track.id,
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          modestbranding: 1,
+          rel: 0,
+        },
+        events: {
+          onReady: () => {
+            updateTrackUI();
+          },
+          onStateChange: (event) => {
+            const playBtn = document.getElementById('player-play');
+            const discEl = document.getElementById('player-disc');
+            // YT.PlayerState.PLAYING === 1, PAUSED === 2, ENDED === 0
+            if (event.data === 1) {
+              isPlaying = true;
+              if (playBtn) playBtn.textContent = '❚❚';
+              if (discEl) discEl.classList.add('disc-spinning');
+              startPolling();
+            } else if (event.data === 2) {
+              isPlaying = false;
+              if (playBtn) playBtn.textContent = '▶';
+              if (discEl) discEl.classList.remove('disc-spinning');
+              stopPolling();
+            } else if (event.data === 0) {
+              // Track ended, go next
+              playNext();
+            }
+          },
+        },
+      });
+    };
+
+    function startPolling() {
+      stopPolling();
+      pollInterval = setInterval(() => {
+        if (!ytPlayer || typeof ytPlayer.getCurrentTime !== 'function') return;
+        const current = ytPlayer.getCurrentTime() || 0;
+        const duration = ytPlayer.getDuration() || 0;
+        const curEl = document.getElementById('player-current-time');
+        const durEl = document.getElementById('player-duration');
+        const fillEl = document.getElementById('player-progress-fill');
+
+        if (curEl) curEl.textContent = formatTime(current);
+        if (durEl) durEl.textContent = formatTime(duration);
+        if (fillEl && duration > 0) {
+          fillEl.style.width = `${(current / duration) * 100}%`;
+        }
+      }, 250);
+    }
+
+    function stopPolling() {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+    }
+
+    function togglePlay() {
+      initYouTube();
+      if (!ytPlayer || typeof ytPlayer.playVideo !== 'function') return;
+      if (isPlaying) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+    }
+
+    function playTrackAtIndex(idx) {
+      initYouTube();
+      if (idx < 0) idx = playlist.length - 1;
+      if (idx >= playlist.length) idx = 0;
+      currentIndex = idx;
+      updateTrackUI();
+
+      if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+        ytPlayer.loadVideoById(playlist[currentIndex].id);
+        ytPlayer.playVideo();
+      }
+    }
+
+    function playNext() {
+      playTrackAtIndex(currentIndex + 1);
+    }
+
+    function playPrev() {
+      playTrackAtIndex(currentIndex - 1);
+    }
+
+    // Global hook for Jukebox cards to trigger playback
+    window.playTrack = (trackData) => {
+      initYouTube();
+      // Check if track is already in queue
+      let existingIdx = playlist.findIndex((t) => t.id === trackData.id);
+      if (existingIdx === -1) {
+        playlist.unshift(trackData);
+        existingIdx = 0;
+      }
+      playTrackAtIndex(existingIdx);
+
+      // Unhide player if minimized
+      const playerBar = document.getElementById('global-audio-player');
+      if (playerBar) playerBar.classList.remove('translate-y-full');
+    };
+
+    // Attach DOM Events
+    function attachPlayerEvents() {
+      const playBtn = document.getElementById('player-play');
+      const prevBtn = document.getElementById('player-prev');
+      const nextBtn = document.getElementById('player-next');
+      const scrubber = document.getElementById('player-scrubber-track');
+      const muteBtn = document.getElementById('player-mute');
+      const queueBtn = document.getElementById('player-queue-btn');
+      const queuePanel = document.getElementById('player-queue-panel');
+      const toggleHideBtn = document.getElementById('player-toggle-hide');
+      const playerBar = document.getElementById('global-audio-player');
+
+      if (playBtn) playBtn.onclick = togglePlay;
+      if (prevBtn) prevBtn.onclick = playPrev;
+      if (nextBtn) nextBtn.onclick = playNext;
+
+      if (scrubber) {
+        scrubber.onclick = (e) => {
+          if (!ytPlayer || typeof ytPlayer.seekTo !== 'function') return;
+          const rect = scrubber.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const pct = Math.max(0, Math.min(1, clickX / rect.width));
+          const duration = ytPlayer.getDuration() || 0;
+          if (duration > 0) {
+            ytPlayer.seekTo(pct * duration, true);
+          }
+        };
+      }
+
+      if (muteBtn) {
+        muteBtn.onclick = () => {
+          if (!ytPlayer) return;
+          if (isMuted) {
+            ytPlayer.unMute();
+            muteBtn.textContent = '🔊';
+            isMuted = false;
+          } else {
+            ytPlayer.mute();
+            muteBtn.textContent = '🔇';
+            isMuted = true;
+          }
+        };
+      }
+
+      if (queueBtn && queuePanel) {
+        queueBtn.onclick = () => {
+          queuePanel.classList.toggle('hidden');
+        };
+      }
+
+      if (toggleHideBtn && playerBar) {
+        toggleHideBtn.onclick = () => {
+          playerBar.classList.add('translate-y-full', 'transition-transform');
+        };
+      }
+
+      updateTrackUI();
+    }
+
+    // Initialize on page load
+    document.addEventListener('astro:page-load', () => {
+      attachPlayerEvents();
+    });
+
+    // Run immediately on first mount
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', attachPlayerEvents);
+    } else {
+      attachPlayerEvents();
+    }
+  })();
+</script>

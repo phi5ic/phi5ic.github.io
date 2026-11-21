@@ -4,6 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Sidebar from '../components/Sidebar.astro';
 import WelcomeOverlay from '../components/WelcomeOverlay.astro';
+import GlobalAudioPlayer from '../components/GlobalAudioPlayer.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -155,5 +156,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
         <Footer />
       </div>
     </div>
+    <GlobalAudioPlayer />
   </body>
 </html>

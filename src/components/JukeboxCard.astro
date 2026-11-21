@@ -1,0 +1,121 @@
+---
+interface Props {
+  ytId?: string;
+  title: string;
+  artist: string;
+  tag?: string;
+  cover?: string;
+  author?: string;
+  time?: string;
+}
+
+const {
+  ytId = 'WP9G8NrBqSs',
+  title = 'Fall Children',
+  artist = 'AFI',
+  tag = 'horror punk',
+  cover = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+  author = '@phi5ic',
+  time = 'rotation',
+} = Astro.props;
+---
+
+<div
+  class="jukebox-card max-w-xs border border-[#2a0e2e] bg-[#100613]/90 rounded-sm p-3 font-mono text-xs select-none hover:border-[#ff2a85]/60 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.6)] group"
+  data-yt-id={ytId}
+  data-title={title}
+  data-artist={artist}
+  data-tag={tag}
+  data-cover={cover}
+>
+  <!-- Card Header -->
+  <div class="flex items-center justify-between text-[11px] pb-2 mb-2 border-b border-[#2a0e2e]">
+    <div class="flex items-center gap-1.5 text-white">
+      <span class="text-[#ff2a85]">♫</span>
+      <span class="font-bold">{author}</span>
+    </div>
+    <span class="text-[#854d80] text-[10px]">{time}</span>
+  </div>
+
+  <!-- Cover Image Box (Dithered Retro 1-bit / CRT Screen) -->
+  <div class="relative aspect-square w-full bg-[#050206] border border-[#2a0e2e] overflow-hidden rounded-xs mb-3 group-hover:border-[#ff2a85]/40 transition-colors">
+    <img
+      src={cover}
+      alt={`${title} - ${artist}`}
+      class="w-full h-full object-cover filter grayscale contrast-175 brightness-95 dither-effect group-hover:scale-105 transition-transform duration-300"
+      loading="lazy"
+    />
+    
+    <!-- Halftone CRT scanline overlay -->
+    <div class="absolute inset-0 bg-[radial-gradient(#ff2a85_1px,transparent_1px)] bg-[size:3px_3px] opacity-20 pointer-events-none mix-blend-screen"></div>
+
+    <!-- Heart & Tag badges on cover -->
+    <div class="absolute top-2 left-2 w-6 h-6 border border-[#2a0e2e] bg-[#070308]/80 text-[#ff2a85] flex items-center justify-center rounded-xs text-[11px]">
+      ♡
+    </div>
+    {tag && (
+      <div class="absolute top-2 right-2 border border-[#2a0e2e] bg-[#070308]/85 text-[#ff79c6] px-1.5 py-0.5 rounded-xs text-[10px]">
+        {tag}
+      </div>
+    )}
+
+    <!-- Play overlay button -->
+    <button
+      type="button"
+      class="play-trigger absolute inset-0 flex items-center justify-center bg-[#070308]/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white font-bold text-sm"
+    >
+      <span class="border border-[#ff2a85] bg-[#ff2a85]/20 text-[#ff2a85] px-2.5 py-1 rounded-sm shadow-[0_0_12px_rgba(255,42,133,0.5)]">
+        ▶ LOAD &amp; PLAY
+      </span>
+    </button>
+  </div>
+
+  <!-- Track Meta -->
+  <div class="space-y-1 mb-3">
+    <h3 class="text-white text-sm font-bold tracking-tight truncate group-hover:text-[#ff79c6] transition-colors">
+      {title}
+    </h3>
+    <p class="text-[#854d80] text-xs truncate">
+      {artist}
+    </p>
+  </div>
+
+  <!-- Bottom Row: Tag & Spinning Disc -->
+  <div class="flex items-center justify-between pt-2 border-t border-[#2a0e2e] text-[11px]">
+    {tag && (
+      <span class="border border-[#2a0e2e] bg-[#1a081e]/60 text-[#ff2a85] px-1.5 py-0.5 rounded-xs text-[10px]">
+        {tag}
+      </span>
+    )}
+    
+    <button
+      type="button"
+      class="play-trigger inline-flex items-center gap-1.5 text-[#ff2a85] hover:text-white cursor-pointer"
+    >
+      <span>(▶) play</span>
+    </button>
+  </div>
+</div>
+
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll('.jukebox-card').forEach((card) => {
+      const triggers = card.querySelectorAll('.play-trigger');
+      const handlePlay = (e) => {
+        e.stopPropagation();
+        const id = card.getAttribute('data-yt-id');
+        const title = card.getAttribute('data-title');
+        const artist = card.getAttribute('data-artist');
+        const tag = card.getAttribute('data-tag');
+        const cover = card.getAttribute('data-cover');
+
+        if (window.playTrack) {
+          window.playTrack({ id, title, artist, tag, cover });
+        }
+      };
+
+      triggers.forEach((btn) => btn.addEventListener('click', handlePlay));
+      card.addEventListener('click', handlePlay);
+    });
+  });
+</script>

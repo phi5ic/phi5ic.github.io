@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import JukeboxCard from '../../components/JukeboxCard.astro';
 
 const allPosts = (await getCollection('blog'))
   .filter((post) => !post.data.draft)
@@ -81,10 +82,38 @@ const sections = [
             <p class="text-[11px] text-[#854d80]">{sec.description}</p>
           </div>
 
-          {sec.posts.length === 0 ? (
-            <div class="border border-dashed border-[#2a0e2e] p-4 text-xs text-[#854d80] bg-[#100613]/30 rounded-sm">
-              <span class="text-[#ff2a85]">&gt;</span> [ empty buffer: no logs published under this section yet ]
+          {sec.id === 'music' && (
+            <div class="space-y-3 pt-1">
+              <div class="text-[11px] text-[#854d80]">
+                // CYBER JUKEBOX (tap to stream in bottom player):
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <JukeboxCard
+                  ytId="WP9G8NrBqSs"
+                  title="Fall Children"
+                  artist="AFI"
+                  tag="horror punk"
+                  author="@phi5ic"
+                  time="heavy rotation"
+                />
+                <JukeboxCard
+                  ytId="lTRiuFIWV54"
+                  title="Headlock"
+                  artist="Snail Mail"
+                  tag="indie rock"
+                  author="@phi5ic"
+                  time="rotation"
+                />
+              </div>
             </div>
+          )}
+
+          {sec.posts.length === 0 ? (
+            sec.id !== 'music' && (
+              <div class="border border-dashed border-[#2a0e2e] p-4 text-xs text-[#854d80] bg-[#100613]/30 rounded-sm">
+                <span class="text-[#ff2a85]">&gt;</span> [ empty buffer: no logs published under this section yet ]
+              </div>
+            )
           ) : (
             <div class="space-y-4">
               {sec.posts.map((post) => {
