@@ -1,10 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=DotGothic16&display=swap');
+@font-face {
+  font-family: 'Departure Mono';
+  src: url('/fonts/DepartureMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @import "tailwindcss";
 @import "katex/dist/katex.min.css";
 
 @theme {
-  --font-sans: 'DotGothic16', sans-serif;
-  --font-mono: 'DotGothic16', sans-serif;
+  --font-sans: 'Departure Mono', monospace;
+  --font-mono: 'Departure Mono', monospace;
 }
 
 :root {
@@ -27,20 +34,21 @@
 html {
   background-color: var(--bg);
   color: var(--text);
-  font-family: 'DotGothic16', sans-serif;
+  font-family: 'Departure Mono', monospace;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;
+  image-rendering: pixelated;
   scroll-behavior: smooth;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 body {
   background-color: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  font-family: 'DotGothic16', sans-serif;
-  letter-spacing: 0.02em;
+  font-family: 'Departure Mono', monospace;
+  letter-spacing: -0.01em;
 }
 
 ::selection {
@@ -61,9 +69,9 @@ a:hover {
   text-decoration-color: var(--accent-bright);
 }
 
-/* LCD Matrix Code tags */
+/* Code tags */
 code, pre, kbd, samp {
-  font-family: 'DotGothic16', sans-serif !important;
+  font-family: 'Departure Mono', monospace !important;
   font-size: 0.95em;
 }
 
@@ -75,28 +83,27 @@ code, pre, kbd, samp {
   border: 1px solid var(--border);
 }
 
-/* Cyber-Magenta Prose in LCD Dot Matrix */
+/* Cyber-Magenta Prose in Departure Mono */
 .prose-minimal {
   color: #ecd2e8;
-  font-size: 1rem;
-  line-height: 1.75;
-  font-family: 'DotGothic16', sans-serif;
-  letter-spacing: 0.02em;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  font-family: 'Departure Mono', monospace;
 }
 
 .prose-minimal h2 {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #ffffff;
   margin-top: 2.5rem;
   margin-bottom: 0.75rem;
   padding-bottom: 0.3rem;
   border-bottom: 1px solid var(--border);
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
 }
 
 .prose-minimal h3 {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--accent);
   margin-top: 1.75rem;
@@ -141,12 +148,12 @@ code, pre, kbd, samp {
   margin-bottom: 0.35rem;
 }
 
-/* LCD Matrix Tables */
+/* Cyber Tables */
 .prose-minimal table {
   width: 100%;
   margin: 1.75rem 0;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   display: block;
   overflow-x: auto;
 }
@@ -180,8 +187,8 @@ code, pre, kbd, samp {
   background-color: #0d0410 !important;
   border: 1px solid var(--border);
   overflow-x: auto;
-  font-size: 0.9rem;
-  font-family: 'DotGothic16', sans-serif !important;
+  font-size: 0.88rem;
+  font-family: 'Departure Mono', monospace !important;
 }
 
 /* Figures */
