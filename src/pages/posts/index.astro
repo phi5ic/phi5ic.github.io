@@ -2,62 +2,159 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
-const posts = (await getCollection('blog')).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
+const allPosts = (await getCollection('blog'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const sections = [
+  {
+    id: 'systems',
+    label: 'Systems & Projects',
+    code: '01',
+    description: 'Nifsi architecture, erasure coding math, kernel drivers, and storage research.',
+    posts: allPosts.filter((p) => p.data.section === 'systems' || !p.data.section),
+  },
+  {
+    id: 'music',
+    label: 'Music & Interests',
+    code: '02',
+    description: 'Albums on repeat, soundscapes, audio gear, and personal tastes.',
+    posts: allPosts.filter((p) => p.data.section === 'music'),
+  },
+  {
+    id: 'rants',
+    label: 'Rants & Hardware',
+    code: '03',
+    description: 'Hardware pricing, expensive DRAM, college coursework, and raw opinions.',
+    posts: allPosts.filter((p) => p.data.section === 'rants'),
+  },
+];
 ---
 
 <BaseLayout
   title="Writing — Aravind Anilraj (phi5ic)"
-  description="Technical writing and benchmarks on storage architecture, erasure coding, and Linux internals."
+  description="Technical writing, systems research, music tastes, and hardware rants."
 >
-  <div class="space-y-10 font-mono">
+  <div class="space-y-8 font-mono">
     <!-- Header -->
-    <header class="border border-[#2a0e2e] bg-[#100613] p-4 sm:p-5 rounded-sm space-y-1">
+    <header class="border border-[#2a0e2e] bg-[#100613] p-4 sm:p-5 rounded-sm space-y-2">
       <div class="text-[11px] text-[#854d80]">phi5ic@mesh ~ $ ls -la /posts/</div>
       <h1 class="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
         <span>Writing &amp; Postmortems</span>
-        <span class="text-[#ff2a85] text-xs font-normal">[{posts.length} entries]</span>
+        <span class="text-[#ff2a85] text-xs font-normal">[{allPosts.length} entries]</span>
       </h1>
       <p class="text-xs text-[#c9a6c5]">
-        Architecture writeups, empirical benchmarks, and systems engineering postmortems.
+        Architecture deep-dives, empirical benchmarks, music thoughts, and hardware rants.
       </p>
+
+      <!-- Subsection Quick Jump / Filter Tabs -->
+      <div class="pt-3 border-t border-[#2a0e2e] flex flex-wrap items-center gap-2 text-xs">
+        <span class="text-[#854d80] text-[11px]">sections:</span>
+        <button
+          type="button"
+          data-filter="all"
+          class="filter-tab px-2 py-0.5 rounded-sm border border-[#ff2a85] bg-[#ff2a85]/20 text-white font-bold cursor-pointer"
+        >
+          [ALL ({allPosts.length})]
+        </button>
+        {sections.map((sec) => (
+          <button
+            type="button"
+            data-filter={sec.id}
+            class="filter-tab px-2 py-0.5 rounded-sm border border-[#2a0e2e] hover:border-[#ff2a85]/50 text-[#ff2a85] hover:text-[#ff79c6] hover:bg-[#1a081e] cursor-pointer"
+          >
+            [{sec.code}: {sec.label} ({sec.posts.length})]
+          </button>
+        ))}
+      </div>
     </header>
 
-    <div class="space-y-6">
-      {posts.map((post) => {
-        const postSlug = post.id.replace(/\.mdx?$/, '');
-        const formattedDate = new Intl.DateTimeFormat('en-US', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        }).format(post.data.date);
+    <!-- Subsections -->
+    <div class="space-y-10" id="sections-container">
+      {sections.map((sec) => (
+        <section data-section={sec.id} class="section-group space-y-4">
+          <div class="border-b border-[#2a0e2e] pb-1.5 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+            <h2 class="text-xs uppercase tracking-wider text-[#ff2a85] font-bold flex items-center gap-2">
+              <span>-- [{sec.code}] {sec.label} --</span>
+              <span class="text-[#854d80] text-[10px] font-normal">({sec.posts.length})</span>
+            </h2>
+            <p class="text-[11px] text-[#854d80]">{sec.description}</p>
+          </div>
 
-        return (
-          <article class="border border-[#2a0e2e] bg-[#100613]/70 p-4 rounded-sm space-y-2 group">
-            <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
-              <a
-                href={`/posts/${postSlug}/`}
-                class="text-sm sm:text-base font-bold text-white group-hover:text-[#ff79c6] no-underline"
-              >
-                &gt; {post.data.title}
-              </a>
-              <time datetime={post.data.date.toISOString()} class="text-xs text-[#854d80] shrink-0 font-mono">
-                [{formattedDate}]
-              </time>
+          {sec.posts.length === 0 ? (
+            <div class="border border-dashed border-[#2a0e2e] p-4 text-xs text-[#854d80] bg-[#100613]/30 rounded-sm">
+              <span class="text-[#ff2a85]">&gt;</span> [ empty buffer: no logs published under this section yet ]
             </div>
-            <p class="text-xs sm:text-sm text-[#ecd2e8] leading-relaxed">
-              {post.data.excerpt}
-            </p>
-            <div class="flex flex-wrap items-center gap-3 text-xs pt-2 border-t border-[#2a0e2e] text-[#ff2a85]">
-              <a href={`/posts/${postSlug}/`} class="hover:text-[#ff79c6]">[read article &rarr;]</a>
-              {post.data.categories && post.data.categories.length > 0 && (
-                <span class="text-[#854d80]">category: {post.data.categories.join('/')}</span>
-              )}
+          ) : (
+            <div class="space-y-4">
+              {sec.posts.map((post) => {
+                const postSlug = post.id.replace(/\.mdx?$/, '');
+                const formattedDate = new Intl.DateTimeFormat('en-US', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                }).format(post.data.date);
+
+                return (
+                  <article class="border border-[#2a0e2e] bg-[#100613]/70 p-4 rounded-sm space-y-2 group hover:border-[#ff2a85]/50 transition-colors">
+                    <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+                      <a
+                        href={`/posts/${postSlug}/`}
+                        class="text-sm sm:text-base font-bold text-white group-hover:text-[#ff79c6] no-underline"
+                      >
+                        &gt; {post.data.title}
+                      </a>
+                      <time datetime={post.data.date.toISOString()} class="text-xs text-[#854d80] shrink-0 font-mono">
+                        [{formattedDate}]
+                      </time>
+                    </div>
+                    <p class="text-xs sm:text-sm text-[#ecd2e8] leading-relaxed">
+                      {post.data.excerpt}
+                    </p>
+                    <div class="flex flex-wrap items-center gap-3 text-xs pt-2 border-t border-[#2a0e2e] text-[#ff2a85]">
+                      <a href={`/posts/${postSlug}/`} class="hover:text-[#ff79c6]">[read article &rarr;]</a>
+                      {post.data.categories && post.data.categories.length > 0 && (
+                        <span class="text-[#854d80]">tags: {post.data.categories.join(', ')}</span>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
             </div>
-          </article>
-        );
-      })}
+          )}
+        </section>
+      ))}
     </div>
   </div>
+
+  <script is:inline>
+    document.addEventListener('astro:page-load', () => {
+      const tabs = document.querySelectorAll('.filter-tab');
+      const sections = document.querySelectorAll('.section-group');
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          const filter = tab.getAttribute('data-filter');
+
+          // Update active styles
+          tabs.forEach((t) => {
+            t.classList.remove('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
+            t.classList.add('border-[#2a0e2e]', 'text-[#ff2a85]');
+          });
+          tab.classList.remove('border-[#2a0e2e]', 'text-[#ff2a85]');
+          tab.classList.add('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
+
+          // Filter sections
+          sections.forEach((sec) => {
+            const secId = sec.getAttribute('data-section');
+            if (filter === 'all' || filter === secId) {
+              sec.style.display = 'block';
+            } else {
+              sec.style.display = 'none';
+            }
+          });
+        });
+      });
+    });
+  </script>
 </BaseLayout>

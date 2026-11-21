@@ -71,7 +71,10 @@ const posts = (await getCollection('blog')).sort(
               <p class="text-xs sm:text-sm text-[#c9a6c5] leading-relaxed">
                 {post.data.excerpt}
               </p>
-              <div class="text-[11px] text-[#854d80] flex gap-2">
+              <div class="text-[11px] text-[#854d80] flex flex-wrap items-center gap-2">
+                <span class="text-[#ff2a85] border border-[#2a0e2e] bg-[#100613] px-1 py-0.2 rounded-xs text-[10px]">
+                  [{post.data.section || 'systems'}]
+                </span>
                 <span>topic: {post.data.categories ? post.data.categories.join('/') : 'systems'}</span>
                 <span>&bull;</span>
                 <a href={`/posts/${postSlug}/`} class="text-[#ff2a85] hover:text-[#ff79c6]">read post &rarr;</a>
