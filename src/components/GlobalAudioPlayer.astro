@@ -4,7 +4,7 @@
 <div
   id="global-audio-player"
   transition:persist
-  class="fixed bottom-0 left-0 right-0 z-40 bg-[#070308]/95 border-t border-[#2a0e2e] backdrop-blur-md select-none text-xs font-mono py-2 px-3 sm:px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.8)]"
+  class="hidden fixed bottom-0 left-0 right-0 z-40 bg-[#070308]/95 border-t border-[#2a0e2e] backdrop-blur-md select-none text-xs font-mono py-2 px-3 sm:px-6 shadow-[0_-4px_20px_rgba(0,0,0,0.8)]"
 >
   <div class="max-w-5xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
     <!-- Left: Track info -->
@@ -13,8 +13,8 @@
         ♫
       </div>
       <div class="min-w-0 leading-tight">
-        <div id="player-title" class="text-white text-xs font-bold truncate">Fall Children</div>
-        <div id="player-artist" class="text-[#854d80] text-[11px] truncate">AFI</div>
+        <div id="player-title" class="text-white text-xs font-bold truncate">No Track</div>
+        <div id="player-artist" class="text-[#854d80] text-[11px] truncate">Queue empty</div>
       </div>
     </div>
 
@@ -163,30 +163,8 @@
     if (window._musicPlayerInitialized) return;
     window._musicPlayerInitialized = true;
 
-    // Default Playlist
-    const playlist = [
-      {
-        id: 'WP9G8NrBqSs',
-        title: 'Fall Children',
-        artist: 'AFI',
-        tag: 'horror punk',
-        cover: 'https://img.youtube.com/vi/WP9G8NrBqSs/hqdefault.jpg',
-      },
-      {
-        id: 'lTRiuFIWV54',
-        title: 'Headlock',
-        artist: 'Snail Mail',
-        tag: 'indie rock',
-        cover: 'https://img.youtube.com/vi/lTRiuFIWV54/hqdefault.jpg',
-      },
-      {
-        id: 'dQw4w9WgXcQ',
-        title: 'Never Gonna Give You Up',
-        artist: 'Rick Astley',
-        tag: 'classic',
-        cover: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
-      }
-    ];
+    // Playlist (starts empty until you add music)
+    let playlist = [];
 
     let currentIndex = 0;
     let ytPlayer = null;
@@ -204,10 +182,15 @@
 
     function updateTrackUI() {
       const track = playlist[currentIndex];
-      if (!track) return;
       const titleEl = document.getElementById('player-title');
       const artistEl = document.getElementById('player-artist');
       const linkEl = document.getElementById('player-yt-link');
+      if (!track) {
+        if (titleEl) titleEl.textContent = 'No track';
+        if (artistEl) artistEl.textContent = 'Queue empty';
+        renderQueue();
+        return;
+      }
       if (titleEl) titleEl.textContent = track.title;
       if (artistEl) artistEl.textContent = track.artist;
       if (linkEl) linkEl.href = `https://www.youtube.com/watch?v=${track.id}`;
@@ -357,9 +340,9 @@
       }
       playTrackAtIndex(existingIdx);
 
-      // Unhide player if minimized
+      // Unhide player if hidden/minimized
       const playerBar = document.getElementById('global-audio-player');
-      if (playerBar) playerBar.classList.remove('translate-y-full');
+      if (playerBar) playerBar.classList.remove('hidden', 'translate-y-full');
     };
 
     // Attach DOM Events
