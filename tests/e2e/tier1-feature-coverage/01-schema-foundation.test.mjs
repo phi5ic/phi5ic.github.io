@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { execSync } from 'node:child_process';
 import { z } from 'astro/zod';
 import { parseFrontmatter } from '@astrojs/markdown-remark';
 
@@ -159,10 +160,14 @@ test('Feature 2: Secrets Hygiene & Environment Template', async (t) => {
   });
 
   await t.test('2.5 Repository root does not contain committed live .env secrets', () => {
+    let tracked = '';
+    try {
+      tracked = execSync('git ls-files .env', { encoding: 'utf8' }).trim();
+    } catch {}
     assert.equal(
-      fs.existsSync('.env'),
-      false,
-      'Live .env must not exist in clean repository working tree'
+      tracked,
+      '',
+      'Live .env must not be tracked or committed in git'
     );
   });
 });

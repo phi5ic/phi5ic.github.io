@@ -7,7 +7,7 @@ import rehypeKatex from 'rehype-katex';
 
 export default defineConfig({
   site: 'https://phi5ic.github.io',
-  trailingSlash: 'always',
+  trailingSlash: 'ignore',
   output: 'static',
   adapter: node({ mode: 'standalone' }),
   build: {
