@@ -1,6 +1,12 @@
 import crypto from 'node:crypto';
 import type { AstroCookies } from 'astro';
 
+try {
+  if (typeof process.loadEnvFile === 'function') {
+    process.loadEnvFile();
+  }
+} catch {}
+
 export interface SessionUser {
   login: string;
   id: number;

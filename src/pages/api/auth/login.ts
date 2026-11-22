@@ -28,7 +28,10 @@ export const GET: APIRoute = async (context) => {
     process.env.GITHUB_OAUTH_BASE_URL ||
     'https://github.com'
   ).replace(/\/+$/, '');
-  const clientId = process.env.GITHUB_CLIENT_ID || '';
+  const clientId =
+    process.env.GITHUB_CLIENT_ID ||
+    ((import.meta as any).env ? (import.meta as any).env.GITHUB_CLIENT_ID : '') ||
+    '';
 
   // 4. Construct GitHub OAuth authorization URL
   const callbackUrl = new URL('/api/auth/callback', context.url).toString();
