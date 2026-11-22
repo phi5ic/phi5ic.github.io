@@ -3,14 +3,53 @@ export const prerender = false;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
 
 const user = Astro.locals.user;
 if (!user) {
   return Astro.redirect('/login');
 }
 
+function computeGitBlobSha(content: Buffer | string): string {
+  const buf = Buffer.isBuffer(content) ? content : Buffer.from(content, 'utf8');
+  const header = Buffer.from(`blob ${buf.length}\0`, 'utf8');
+  return crypto.createHash('sha1').update(Buffer.concat([header, buf])).digest('hex');
+}
+
+function getPostSha(postId: string): string {
+  try {
+    const candidates = [
+      path.join(process.cwd(), 'src/content/blog', postId),
+      path.join(process.cwd(), 'src/content/blog', `${postId}.md`),
+      path.join(process.cwd(), 'src/content/blog', `${postId}.mdx`),
+    ];
+    for (const c of candidates) {
+      if (fs.existsSync(c)) {
+        return computeGitBlobSha(fs.readFileSync(c));
+      }
+    }
+    const blogDir = path.join(process.cwd(), 'src/content/blog');
+    if (fs.existsSync(blogDir)) {
+      const files = fs.readdirSync(blogDir);
+      const match = files.find(f => f.toLowerCase().replace(/\.mdx?$/, '') === postId.toLowerCase().replace(/\.mdx?$/, ''));
+      if (match) {
+        return computeGitBlobSha(fs.readFileSync(path.join(blogDir, match)));
+      }
+    }
+  } catch {}
+  return '';
+}
+
 const rawPosts = await getCollection('blog');
-const posts = rawPosts.sort(
+const posts = rawPosts.map((post) => {
+  const sha = getPostSha(post.id);
+  return {
+    ...post,
+    sha,
+  };
+}).sort(
   (a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf()
 );
 ---
@@ -67,6 +106,15 @@ const posts = rawPosts.sort(
           Total published posts in <span class="text-white">src/content/blog/</span>: {posts.length}
         </div>
         <div class="flex items-center gap-2 text-xs">
+          <select
+            id="filter-section"
+            class="px-2 py-1 bg-[#0d0410] border border-[#2a0e2e] rounded-xs text-xs text-white focus:border-[#ff2a85] outline-none"
+          >
+            <option value="all">All Sections</option>
+            <option value="systems">systems</option>
+            <option value="music">music</option>
+            <option value="rants">rants</option>
+          </select>
           <input
             type="text"
             id="search-posts"
@@ -120,10 +168,11 @@ const posts = rawPosts.sort(
                   class="btn-edit-post px-2 py-1 text-xs border border-[#2a0e2e] hover:border-[#ff2a85] text-[#ff2a85] hover:text-white rounded-xs cursor-pointer"
                   data-post={JSON.stringify({
                     slug: postSlug,
+                    sha: post.sha,
                     title: post.data.title,
                     date: new Date(post.data.date).toISOString().split('T')[0],
                     section: post.data.section || 'systems',
-                    excerpt: post.data.excerpt,
+                    excerpt: post.data.excerpt || '',
                     teaser: post.data.header?.teaser || '',
                     categories: post.data.categories?.join(', ') || '',
                     tags: post.data.tags?.join(', ') || '',
@@ -208,6 +257,17 @@ const posts = rawPosts.sort(
                 class="w-full px-2.5 py-1.5 bg-[#070308] border border-[#2a0e2e] focus:border-[#ff2a85] text-white rounded-xs outline-none"
               />
             </div>
+
+            <!-- Teaser Image -->
+            <div class="space-y-1 sm:col-span-2">
+              <label class="text-[#854d80]">Header Teaser Image (optional image path or URL)</label>
+              <input
+                type="text"
+                id="field-teaser"
+                placeholder="/assets/images/posts/sample.jpg"
+                class="w-full px-2.5 py-1.5 bg-[#070308] border border-[#2a0e2e] focus:border-[#ff2a85] text-white rounded-xs outline-none"
+              />
+            </div>
           </div>
 
           <!-- Excerpt -->
@@ -271,7 +331,7 @@ const posts = rawPosts.sort(
               id="btn-toggle-view"
               class="px-2 py-0.5 border border-[#2a0e2e] hover:border-[#ff2a85] text-[#ff2a85] rounded-xs cursor-pointer"
             >
-              [SPLIT / PREVIEW VIEW]
+              [SPLIT VIEW]
             </button>
           </div>
         </div>
@@ -279,7 +339,7 @@ const posts = rawPosts.sort(
         <!-- Split Workspace: Markdown Input + Live Preview -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-[420px]" id="editor-workspace">
           <!-- Textarea Input Pane -->
-          <div class="flex flex-col space-y-1">
+          <div class="flex flex-col space-y-1" id="pane-buffer-col">
             <div class="text-[11px] text-[#854d80] flex items-center justify-between">
               <span>// MARKDOWN BUFFER</span>
               <span class="text-[10px]">UTF-8</span>
@@ -293,7 +353,7 @@ const posts = rawPosts.sort(
           </div>
 
           <!-- Live Preview Pane -->
-          <div class="flex flex-col space-y-1">
+          <div class="flex flex-col space-y-1" id="pane-preview-col">
             <div class="text-[11px] text-[#854d80] flex items-center justify-between">
               <span>// COMPILED PREVIEW</span>
               <span class="text-[#ff2a85] text-[10px]">[LIVE]</span>
@@ -329,8 +389,233 @@ const posts = rawPosts.sort(
     </section>
   </div>
 
-  <script is:inline>
-    document.addEventListener('astro:page-load', () => {
+  <script>
+    import katex from 'katex';
+    import { calculateMetrics } from '../../utils/metrics';
+
+    function deriveSlug(text: string): string {
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
+    function escapeHtml(str: string): string {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function parseInline(str: string): string {
+      return str
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+        .replace(/_([^_]+)_/g, '<em>$1</em>')
+        .replace(/~~([^~]+)~~/g, '<del>$1</del>');
+    }
+
+    function renderMarkdownAndMath(rawText: string, enableMath: boolean): string {
+      if (!rawText || !rawText.trim()) {
+        return '<p class="text-[#854d80] text-xs">// Live preview will render here...</p>';
+      }
+
+      const tokens: Record<string, string> = {};
+      let tokenCounter = 0;
+      function saveToken(html: string): string {
+        const key = `@@TOKEN_${tokenCounter++}@@`;
+        tokens[key] = html;
+        return key;
+      }
+
+      let text = rawText;
+
+      // 1. Fenced code blocks
+      text = text.replace(/```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g, (_match, lang, code) => {
+        const langAttr = lang ? ` class="language-${escapeHtml(lang)}"` : '';
+        return saveToken(`<pre><code${langAttr}>${escapeHtml(code)}</code></pre>`);
+      });
+
+      // 2. KaTeX math (if enabled)
+      if (enableMath) {
+        // Block math $$ ... $$
+        text = text.replace(/\$\$([\s\S]*?)\$\$/g, (_match, expr) => {
+          try {
+            const rendered = katex.renderToString(expr.trim(), {
+              displayMode: true,
+              throwOnError: false,
+            });
+            return saveToken(rendered);
+          } catch (err: any) {
+            return saveToken(`<pre class="text-[#ff2a85]">KaTeX Error: ${escapeHtml(err.message)}</pre>`);
+          }
+        });
+
+        // Inline math $ ... $
+        text = text.replace(/\$([^$\n]+?)\$/g, (_match, expr) => {
+          try {
+            const rendered = katex.renderToString(expr.trim(), {
+              displayMode: false,
+              throwOnError: false,
+            });
+            return saveToken(rendered);
+          } catch (err: any) {
+            return saveToken(`<span class="text-[#ff2a85]">KaTeX Error: ${escapeHtml(err.message)}</span>`);
+          }
+        });
+      }
+
+      // 3. Inline code `code`
+      text = text.replace(/`([^`\n]+)`/g, (_match, code) => {
+        return saveToken(`<code>${escapeHtml(code)}</code>`);
+      });
+
+      // Isolate headings to separate blocks
+      text = text.replace(/^(#{1,6}\s+[^\n]+)$/gm, '\n\n$1\n\n');
+
+      const rawBlocks = text.split(/\n{2,}/);
+      const renderedBlocks: string[] = [];
+
+      for (let block of rawBlocks) {
+        block = block.trim();
+        if (!block) continue;
+
+        if (/^@@TOKEN_\d+@@$/.test(block)) {
+          renderedBlocks.push(block);
+          continue;
+        }
+
+        // Headings
+        const headingMatch = block.match(/^(#{1,6})\s+(.+)$/m);
+        if (headingMatch && block.startsWith(headingMatch[1])) {
+          const level = headingMatch[1].length;
+          const title = headingMatch[2].trim();
+          const slug = deriveSlug(title);
+          renderedBlocks.push(`<h${level} id="${slug}">${parseInline(title)}</h${level}>`);
+          continue;
+        }
+
+        // Blockquotes
+        if (block.startsWith('>')) {
+          const quoteContent = block
+            .split('\n')
+            .map((line) => line.replace(/^>\s?/, ''))
+            .join('\n');
+          renderedBlocks.push(`<blockquote>${parseInline(quoteContent)}</blockquote>`);
+          continue;
+        }
+
+        // Tables
+        const lines = block.split('\n').map((l) => l.trim());
+        if (
+          lines.length >= 2 &&
+          lines[0].startsWith('|') && lines[0].endsWith('|') &&
+          lines[1].startsWith('|') && lines[1].endsWith('|') &&
+          /^[\|\s\-:]+$/.test(lines[1])
+        ) {
+          const headerCells = lines[0]
+            .slice(1, -1)
+            .split('|')
+            .map((c) => parseInline(c.trim()));
+          const thead = `<thead><tr>${headerCells.map((c) => `<th>${c}</th>`).join('')}</tr></thead>`;
+          const bodyRows: string[] = [];
+          for (let i = 2; i < lines.length; i++) {
+            if (!lines[i].startsWith('|')) continue;
+            const rowCells = lines[i]
+              .slice(1, -1)
+              .split('|')
+              .map((c) => parseInline(c.trim()));
+            bodyRows.push(`<tr>${rowCells.map((c) => `<td>${c}</td>`).join('')}</tr>`);
+          }
+          renderedBlocks.push(`<table>${thead}<tbody>${bodyRows.join('')}</tbody></table>`);
+          continue;
+        }
+
+        // Unordered lists
+        if (lines.every((l) => /^[-*]\s+/.test(l))) {
+          const items = lines.map((l) => `<li>${parseInline(l.replace(/^[-*]\s+/, ''))}</li>`);
+          renderedBlocks.push(`<ul>${items.join('')}</ul>`);
+          continue;
+        }
+
+        // Ordered lists
+        if (lines.every((l) => /^\d+\.\s+/.test(l))) {
+          const items = lines.map((l) => `<li>${parseInline(l.replace(/^\d+\.\s+/, ''))}</li>`);
+          renderedBlocks.push(`<ol>${items.join('')}</ol>`);
+          continue;
+        }
+
+        // Standard paragraph
+        const parsedLines = lines.map((l) => parseInline(l)).join('<br />');
+        renderedBlocks.push(`<p class="my-2 leading-relaxed">${parsedLines}</p>`);
+      }
+
+      let finalHtml = renderedBlocks.join('\n');
+      for (const [key, replacement] of Object.entries(tokens)) {
+        finalHtml = finalHtml.replaceAll(key, replacement);
+      }
+      return finalHtml;
+    }
+
+    function validateEditorPost(data: {
+      title: string;
+      slug: string;
+      date: string;
+      section: string;
+      excerpt: string;
+    }) {
+      const issues: { field: string; message: string }[] = [];
+
+      if (!data.title || typeof data.title !== 'string' || !data.title.trim()) {
+        issues.push({ field: 'title', message: 'Title is required and cannot be empty.' });
+      }
+
+      const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+      if (!data.slug || typeof data.slug !== 'string' || !data.slug.trim()) {
+        issues.push({ field: 'slug', message: 'Slug is required and cannot be empty.' });
+      } else if (!slugRegex.test(data.slug.trim())) {
+        issues.push({
+          field: 'slug',
+          message: 'Invalid slug format. Must be lowercase kebab-case (e.g. my-post-name), containing only lowercase alphanumeric characters and single hyphens.',
+        });
+      }
+
+      const validSections = ['systems', 'music', 'rants'];
+      if (!data.section || !validSections.includes(data.section)) {
+        issues.push({
+          field: 'section',
+          message: 'Invalid section. Must be one of: systems, music, rants.',
+        });
+      }
+
+      if (!data.date || isNaN(Date.parse(data.date))) {
+        issues.push({
+          field: 'date',
+          message: 'Publish date must be a valid date representation (YYYY-MM-DD).',
+        });
+      }
+
+      if (!data.excerpt || typeof data.excerpt !== 'string' || !data.excerpt.trim()) {
+        issues.push({ field: 'excerpt', message: 'Excerpt is required and cannot be empty.' });
+      }
+
+      return {
+        valid: issues.length === 0,
+        issues,
+      };
+    }
+
+    function initAdminDashboard() {
+      const editorForm = document.getElementById('editor-form') as HTMLFormElement | null;
+      if (!editorForm) return;
+      if (editorForm.dataset.initialized === 'true') return;
+      editorForm.dataset.initialized = 'true';
+
       // Tab Navigation Elements
       const btnTabPosts = document.getElementById('btn-tab-posts');
       const btnTabEditor = document.getElementById('btn-tab-editor');
@@ -338,26 +623,33 @@ const posts = rawPosts.sort(
       const panelEditor = document.getElementById('panel-editor');
 
       // Form Elements
-      const editorForm = document.getElementById('editor-form');
-      const titleInput = document.getElementById('field-title');
-      const slugInput = document.getElementById('field-slug');
-      const sectionInput = document.getElementById('field-section');
-      const dateInput = document.getElementById('field-date');
-      const excerptInput = document.getElementById('field-excerpt');
-      const categoriesInput = document.getElementById('field-categories');
-      const tagsInput = document.getElementById('field-tags');
-      const mathCheckbox = document.getElementById('field-math');
-      const draftCheckbox = document.getElementById('field-draft');
-      const bodyInput = document.getElementById('field-body');
+      const titleInput = document.getElementById('field-title') as HTMLInputElement | null;
+      const slugInput = document.getElementById('field-slug') as HTMLInputElement | null;
+      const sectionInput = document.getElementById('field-section') as HTMLSelectElement | null;
+      const dateInput = document.getElementById('field-date') as HTMLInputElement | null;
+      const teaserInput = document.getElementById('field-teaser') as HTMLInputElement | null;
+      const excerptInput = document.getElementById('field-excerpt') as HTMLTextAreaElement | null;
+      const categoriesInput = document.getElementById('field-categories') as HTMLInputElement | null;
+      const tagsInput = document.getElementById('field-tags') as HTMLInputElement | null;
+      const mathCheckbox = document.getElementById('field-math') as HTMLInputElement | null;
+      const draftCheckbox = document.getElementById('field-draft') as HTMLInputElement | null;
+      const bodyInput = document.getElementById('field-body') as HTMLTextAreaElement | null;
 
       const previewPane = document.getElementById('preview-pane');
       const metricWords = document.getElementById('metric-words');
       const metricTime = document.getElementById('metric-time');
       const statusToast = document.getElementById('status-toast');
       const editorModeBadge = document.getElementById('editor-mode-badge');
-      const searchInput = document.getElementById('search-posts');
+      const searchInput = document.getElementById('search-posts') as HTMLInputElement | null;
+      const filterSectionSelect = document.getElementById('filter-section') as HTMLSelectElement | null;
 
-      let currentEditingSha = null;
+      const btnCancelEdit = document.getElementById('btn-cancel-edit');
+      const btnToggleView = document.getElementById('btn-toggle-view');
+      const editorWorkspace = document.getElementById('editor-workspace');
+      const paneBuffer = document.getElementById('pane-buffer-col');
+      const panePreview = document.getElementById('pane-preview-col');
+
+      let currentEditingSha: string | null = null;
       let manualSlugEdited = false;
 
       // Set default date to today
@@ -367,22 +659,30 @@ const posts = rawPosts.sort(
 
       // Switch to Archive Tab
       function showPostsTab() {
-        panelPosts.classList.remove('hidden');
-        panelEditor.classList.add('hidden');
-        btnTabPosts.classList.remove('border-[#2a0e2e]', 'text-[#ff2a85]');
-        btnTabPosts.classList.add('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
-        btnTabEditor.classList.remove('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
-        btnTabEditor.classList.add('border-[#2a0e2e]', 'text-[#ff2a85]');
+        if (panelPosts) panelPosts.classList.remove('hidden');
+        if (panelEditor) panelEditor.classList.add('hidden');
+        if (btnTabPosts) {
+          btnTabPosts.classList.remove('border-[#2a0e2e]', 'text-[#ff2a85]');
+          btnTabPosts.classList.add('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
+        }
+        if (btnTabEditor) {
+          btnTabEditor.classList.remove('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
+          btnTabEditor.classList.add('border-[#2a0e2e]', 'text-[#ff2a85]');
+        }
       }
 
       // Switch to Editor Tab
       function showEditorTab(modeText = '[CREATING NEW POST]') {
-        panelEditor.classList.remove('hidden');
-        panelPosts.classList.add('hidden');
-        btnTabEditor.classList.remove('border-[#2a0e2e]', 'text-[#ff2a85]');
-        btnTabEditor.classList.add('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
-        btnTabPosts.classList.remove('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
-        btnTabPosts.classList.add('border-[#2a0e2e]', 'text-[#ff2a85]');
+        if (panelEditor) panelEditor.classList.remove('hidden');
+        if (panelPosts) panelPosts.classList.add('hidden');
+        if (btnTabEditor) {
+          btnTabEditor.classList.remove('border-[#2a0e2e]', 'text-[#ff2a85]');
+          btnTabEditor.classList.add('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
+        }
+        if (btnTabPosts) {
+          btnTabPosts.classList.remove('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
+          btnTabPosts.classList.add('border-[#2a0e2e]', 'text-[#ff2a85]');
+        }
         if (editorModeBadge) editorModeBadge.textContent = modeText;
       }
 
@@ -398,21 +698,14 @@ const posts = rawPosts.sort(
       function resetEditor() {
         currentEditingSha = null;
         manualSlugEdited = false;
-        editorForm.reset();
-        dateInput.value = new Date().toISOString().split('T')[0];
+        editorForm?.reset();
+        if (teaserInput) teaserInput.value = '';
+        if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+        if (editorModeBadge) editorModeBadge.textContent = '[CREATING NEW POST]';
         updatePreview();
       }
 
       // Slug Auto-Derivation
-      function deriveSlug(text) {
-        return text
-          .toLowerCase()
-          .trim()
-          .replace(/[^\w\s-]/g, '')
-          .replace(/[\s_-]+/g, '-')
-          .replace(/^-+|-+$/g, '');
-      }
-
       if (titleInput && slugInput) {
         titleInput.addEventListener('input', () => {
           if (!manualSlugEdited) {
@@ -426,122 +719,218 @@ const posts = rawPosts.sort(
 
       // Live Preview & Word Count
       function updatePreview() {
-        const text = bodyInput.value || '';
-        const words = text.trim().split(/\s+/).filter(Boolean);
-        const count = words.length;
-        const readTime = Math.max(1, Math.round(count / 200));
+        const text = bodyInput?.value || '';
+        const { wordCount, readTimeMinutes } = calculateMetrics(text);
 
-        if (metricWords) metricWords.textContent = count;
-        if (metricTime) metricTime.textContent = `${readTime} min`;
+        if (metricWords) metricWords.textContent = String(wordCount);
+        if (metricTime) metricTime.textContent = `${readTimeMinutes} min`;
 
         if (previewPane) {
-          // Basic preview with bold, code, headings, lists
-          let html = text
-            .replace(/^### (.*$)/gim, '<h3 class="text-white text-base font-bold my-2">$1</h3>')
-            .replace(/^## (.*$)/gim, '<h2 class="text-white text-lg font-bold my-3 border-b border-[#2a0e2e] pb-1">$1</h2>')
-            .replace(/^# (.*$)/gim, '<h1 class="text-white text-xl font-bold my-4 text-[#ff2a85]">$1</h1>')
-            .replace(/\*\*(.*)\*\*/gim, '<strong class="text-white">$1</strong>')
-            .replace(/`([^`]+)`/gim, '<code class="bg-[#100613] text-[#ff79c6] px-1 py-0.5 rounded-xs">$1</code>')
-            .replace(/\n\n/gim, '</p><p class="my-2 leading-relaxed">');
-
-          previewPane.innerHTML = `<p class="my-2 leading-relaxed">${html}</p>`;
+          const enableMath = mathCheckbox ? mathCheckbox.checked : true;
+          previewPane.innerHTML = renderMarkdownAndMath(text, enableMath);
         }
       }
 
       if (bodyInput) {
         bodyInput.addEventListener('input', updatePreview);
       }
+      if (mathCheckbox) {
+        mathCheckbox.addEventListener('change', updatePreview);
+      }
 
-      // Search Filter
-      if (searchInput) {
-        searchInput.addEventListener('input', () => {
-          const q = searchInput.value.toLowerCase().trim();
-          document.querySelectorAll('.post-row').forEach((row) => {
-            const title = row.getAttribute('data-title') || '';
-            const slug = row.getAttribute('data-slug') || '';
-            const section = row.getAttribute('data-section') || '';
-            if (!q || title.includes(q) || slug.includes(q) || section.includes(q)) {
-              row.style.display = 'flex';
+      // Initial preview update
+      updatePreview();
+
+      // Search and Section Filter
+      function filterPosts() {
+        const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const sectionFilter = filterSectionSelect ? filterSectionSelect.value : 'all';
+
+        document.querySelectorAll('.post-row').forEach((row) => {
+          const title = (row.getAttribute('data-title') || '').toLowerCase();
+          const slug = (row.getAttribute('data-slug') || '').toLowerCase();
+          const section = (row.getAttribute('data-section') || '').toLowerCase();
+
+          const matchesQuery = !q || title.includes(q) || slug.includes(q) || section.includes(q);
+          const matchesSection = sectionFilter === 'all' || section === sectionFilter;
+
+          if (matchesQuery && matchesSection) {
+            (row as HTMLElement).style.display = 'flex';
+          } else {
+            (row as HTMLElement).style.display = 'none';
+          }
+        });
+      }
+
+      if (searchInput) searchInput.addEventListener('input', filterPosts);
+      if (filterSectionSelect) filterSectionSelect.addEventListener('change', filterPosts);
+
+      // Cancel / Reset Button
+      if (btnCancelEdit) {
+        btnCancelEdit.addEventListener('click', () => {
+          resetEditor();
+          showPostsTab();
+        });
+      }
+
+      // Toggle Split View Button
+      let viewModeIndex = 0;
+      const viewModes = [
+        { label: '[SPLIT VIEW]', buffer: true, preview: true },
+        { label: '[EDITOR ONLY]', buffer: true, preview: false },
+        { label: '[PREVIEW ONLY]', buffer: false, preview: true },
+      ];
+      if (btnToggleView) {
+        btnToggleView.addEventListener('click', () => {
+          viewModeIndex = (viewModeIndex + 1) % viewModes.length;
+          const mode = viewModes[viewModeIndex];
+          btnToggleView.textContent = mode.label;
+          if (paneBuffer) paneBuffer.classList.toggle('hidden', !mode.buffer);
+          if (panePreview) panePreview.classList.toggle('hidden', !mode.preview);
+          if (editorWorkspace) {
+            if (mode.buffer && mode.preview) {
+              editorWorkspace.className = 'grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-[420px]';
             } else {
-              row.style.display = 'none';
+              editorWorkspace.className = 'grid grid-cols-1 gap-4 min-h-[420px]';
             }
-          });
+          }
         });
       }
 
       // Edit Post Button Clicks
       document.querySelectorAll('.btn-edit-post').forEach((btn) => {
         btn.addEventListener('click', () => {
-          const postData = JSON.parse(btn.getAttribute('data-post'));
-          titleInput.value = postData.title;
-          slugInput.value = postData.slug;
-          sectionInput.value = postData.section;
-          dateInput.value = postData.date;
-          excerptInput.value = postData.excerpt;
-          categoriesInput.value = postData.categories;
-          tagsInput.value = postData.tags;
-          mathCheckbox.checked = postData.use_math;
-          draftCheckbox.checked = postData.draft;
-          bodyInput.value = postData.body;
+          const postData = JSON.parse(btn.getAttribute('data-post') || '{}');
+          currentEditingSha = postData.sha || null;
+          if (titleInput) titleInput.value = postData.title || '';
+          if (slugInput) slugInput.value = postData.slug || '';
+          if (sectionInput) sectionInput.value = postData.section || 'systems';
+          if (dateInput) dateInput.value = postData.date || '';
+          if (excerptInput) excerptInput.value = postData.excerpt || '';
+          if (teaserInput) teaserInput.value = postData.teaser || '';
+          if (categoriesInput) categoriesInput.value = postData.categories || '';
+          if (tagsInput) tagsInput.value = postData.tags || '';
+          if (mathCheckbox) mathCheckbox.checked = postData.use_math ?? false;
+          if (draftCheckbox) draftCheckbox.checked = postData.draft ?? false;
+          if (bodyInput) bodyInput.value = postData.body || '';
 
           manualSlugEdited = true;
-          showEditorTab(`[EDITING: ${postData.slug}]`);
+          showEditorTab(`[EDITING: ${postData.slug}]${currentEditingSha ? ` (SHA: ${currentEditingSha.slice(0, 7)})` : ''}`);
           updatePreview();
         });
       });
 
-      // Submit / Publish Flow
-      if (editorForm) {
-        editorForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const btnPublish = document.getElementById('btn-publish');
+      // Submit / Publish Flow with Pre-Commit Schema Validation
+      editorForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const titleVal = titleInput ? titleInput.value.trim() : '';
+        const slugVal = slugInput ? slugInput.value.trim() : '';
+        const dateVal = dateInput ? dateInput.value : '';
+        const sectionVal = sectionInput ? sectionInput.value : '';
+        const excerptVal = excerptInput ? excerptInput.value.trim() : '';
+        const teaserVal = teaserInput ? teaserInput.value.trim() : '';
+
+        // Feature 19: Pre-commit In-Browser Schema Validation
+        const validation = validateEditorPost({
+          title: titleVal,
+          slug: slugVal,
+          date: dateVal,
+          section: sectionVal,
+          excerpt: excerptVal,
+        });
+
+        if (!validation.valid) {
+          if (statusToast) {
+            statusToast.className =
+              'p-3 rounded-sm text-xs border border-[#ff2a85] bg-[#ff2a85]/15 text-[#ff79c6] shadow-[0_0_12px_rgba(255,42,133,0.3)] space-y-1.5';
+            statusToast.innerHTML = `
+              <div class="font-bold text-[#ff2a85] flex items-center gap-2">
+                <span class="inline-block w-2 h-2 rounded-full bg-[#ff2a85] animate-ping"></span>
+                <span>! SCHEMA VALIDATION FAILED // PRE-COMMIT REJECTION</span>
+              </div>
+              <ul class="list-disc list-inside space-y-0.5 text-white/90">
+                ${validation.issues.map((i) => `<li><code class="text-[#ff79c6]">[${i.field}]</code>: ${i.message}</li>`).join('')}
+              </ul>
+            `;
+            statusToast.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+          return;
+        }
+
+        const btnPublish = document.getElementById('btn-publish') as HTMLButtonElement | null;
+        if (btnPublish) {
           btnPublish.disabled = true;
           btnPublish.textContent = '[ COMMITTING TO GITHUB... ]';
+        }
 
-          const payload = {
-            slug: slugInput.value.trim(),
-            frontmatter: {
-              title: titleInput.value.trim(),
-              date: dateInput.value,
-              section: sectionInput.value,
-              excerpt: excerptInput.value.trim(),
-              categories: categoriesInput.value.split(',').map((s) => s.trim()).filter(Boolean),
-              tags: tagsInput.value.split(',').map((s) => s.trim()).filter(Boolean),
-              use_math: mathCheckbox.checked,
-              draft: draftCheckbox.checked,
-            },
-            body: bodyInput.value,
-            sha: currentEditingSha,
-          };
+        const payload = {
+          slug: slugVal,
+          frontmatter: {
+            title: titleVal,
+            date: dateVal,
+            section: sectionVal,
+            excerpt: excerptVal,
+            ...(teaserVal ? { header: { teaser: teaserVal } } : {}),
+            categories: categoriesInput ? categoriesInput.value.split(',').map((s) => s.trim()).filter(Boolean) : [],
+            tags: tagsInput ? tagsInput.value.split(',').map((s) => s.trim()).filter(Boolean) : [],
+            use_math: mathCheckbox ? mathCheckbox.checked : false,
+            draft: draftCheckbox ? draftCheckbox.checked : false,
+          },
+          body: bodyInput ? bodyInput.value : '',
+          sha: currentEditingSha,
+        };
 
-          try {
-            const res = await fetch('/api/publish', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload),
-            });
+        try {
+          const res = await fetch('/api/publish', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
 
-            const data = await res.json();
-            if (res.ok && data.success) {
-              statusToast.className = 'p-3 rounded-sm text-xs border border-[#00ff66] bg-[#00ff66]/15 text-[#00ff66] shadow-[0_0_12px_rgba(0,255,102,0.3)]';
+          const data = await res.json();
+          if (res.ok && data.success) {
+            if (statusToast) {
+              statusToast.className =
+                'p-3 rounded-sm text-xs border border-[#00ff66] bg-[#00ff66]/15 text-[#00ff66] shadow-[0_0_12px_rgba(0,255,102,0.3)]';
               statusToast.innerHTML = `✓ POST PUBLISHED: Successfully committed to main branch! Commit SHA: <code>${data.commit?.sha?.slice(0, 7) || 'HEAD'}</code>. Automated CI/CD will deploy changes to gh-pages momentarily.`;
               statusToast.classList.remove('hidden');
               window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-              statusToast.className = 'p-3 rounded-sm text-xs border border-[#ff2a85] bg-[#ff2a85]/15 text-[#ff79c6] shadow-[0_0_12px_rgba(255,42,133,0.3)]';
+            }
+          } else {
+            if (statusToast) {
+              statusToast.className =
+                'p-3 rounded-sm text-xs border border-[#ff2a85] bg-[#ff2a85]/15 text-[#ff79c6] shadow-[0_0_12px_rgba(255,42,133,0.3)]';
               statusToast.innerHTML = `! PUBLISH ERROR: ${data.message || data.error || 'Failed to commit post.'}`;
               statusToast.classList.remove('hidden');
             }
-          } catch (err) {
+          }
+        } catch (err: any) {
+          if (statusToast) {
             statusToast.className = 'p-3 rounded-sm text-xs border border-[#ff2a85] bg-[#ff2a85]/15 text-[#ff79c6]';
             statusToast.innerHTML = `! NETWORK ERROR: ${err.message}`;
             statusToast.classList.remove('hidden');
-          } finally {
+          }
+        } finally {
+          if (btnPublish) {
             btnPublish.disabled = false;
             btnPublish.textContent = '[✓ PUBLISH & COMMIT DIRECTLY TO GITHUB]';
           }
-        });
-      }
+        }
+      });
+    }
+
+    // Mount listeners
+    document.addEventListener('astro:page-load', () => {
+      const form = document.getElementById('editor-form');
+      if (form) form.removeAttribute('data-initialized');
+      initAdminDashboard();
     });
+    if (document.readyState !== 'loading') {
+      initAdminDashboard();
+    } else {
+      document.addEventListener('DOMContentLoaded', initAdminDashboard);
+    }
   </script>
 </BaseLayout>

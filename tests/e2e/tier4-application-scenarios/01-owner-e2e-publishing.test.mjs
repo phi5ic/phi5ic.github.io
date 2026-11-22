@@ -146,7 +146,7 @@ Benchmark results confirm 3.8x throughput improvement.
     currentSha = data.content.sha;
   });
 
-  await t.test('Step 6: Owner completes session and logs out', { todo: 'Pending M3 /admin route mounting' }, async () => {
+  await t.test('Step 6: Owner completes session and logs out', async () => {
     client.clearCookies();
     const res = await client.get('/admin');
     assert.equal(res.status, 302);

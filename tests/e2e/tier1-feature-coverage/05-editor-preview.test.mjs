@@ -162,7 +162,7 @@ test('Feature 17: KaTeX Formula Rendering in Preview', async (t) => {
   });
 });
 
-test('Feature 18: Word Count & Reading Time Estimation', { todo: 'Pending M3 editor metrics module' }, async (t) => {
+test('Feature 18: Word Count & Reading Time Estimation', async (t) => {
   const metricsModule = await import('../../../src/utils/metrics.ts').catch(() => null);
   if (!metricsModule) {
     return;

@@ -20,7 +20,7 @@ test('Tier 4: Scenario 2 - Adversarial Security & Intrusion Prevention', async (
   const mockUrl = process.env.MOCK_GITHUB_URL || 'http://127.0.0.1:43211';
   const client = new TestHttpClient(baseUrl);
 
-  await t.test('Vector 1: Unauthenticated request to /admin redirects to login', { todo: 'Pending M3 /admin route mounting' }, async () => {
+  await t.test('Vector 1: Unauthenticated request to /admin redirects to login', async () => {
     client.clearCookies();
     const res = await client.get('/admin');
     assert.equal(res.status, 302);
@@ -44,7 +44,7 @@ test('Tier 4: Scenario 2 - Adversarial Security & Intrusion Prevention', async (
     );
   });
 
-  await t.test('Vector 3: Forged AES-256-GCM cookie with bit-flipped ciphertext fails authentication', { todo: 'Pending M3 /admin route mounting' }, async () => {
+  await t.test('Vector 3: Forged AES-256-GCM cookie with bit-flipped ciphertext fails authentication', async () => {
     const valid = createTestSessionCookie();
     const tamperedCt = createTamperedCiphertext(valid);
     if (appAuth) {

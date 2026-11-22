@@ -31,7 +31,7 @@ test('Tier 3: Pairwise Flow 1 - Complete Authentication Lifecycle', async (t) =>
     assert.ok(client.getCookie('blog_session'), 'Must set blog_session cookie');
   });
 
-  await t.test('Flow Step 4: Owner accesses protected dashboard with session cookie', { todo: 'Pending M3 /admin route mounting' }, async () => {
+  await t.test('Flow Step 4: Owner accesses protected dashboard with session cookie', async () => {
     const res = await client.get('/admin');
     assert.equal(res.status, 200);
   });
@@ -52,7 +52,7 @@ test('Tier 3: Pairwise Flow 1 - Complete Authentication Lifecycle', async (t) =>
     await fetch(`${mockUrl}/__mock/reset`, { method: 'POST' });
   });
 
-  await t.test('Flow Step 7: Accessing dashboard after logout is redirected to /login', { todo: 'Pending M3 /admin route mounting' }, async () => {
+  await t.test('Flow Step 7: Accessing dashboard after logout is redirected to /login', async () => {
     const res = await client.get('/admin');
     assert.equal(res.status, 302);
     assert.ok(res.headers.get('location')?.includes('/login'));
