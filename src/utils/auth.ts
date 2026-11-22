@@ -24,7 +24,7 @@ export const OAUTH_STATE_COOKIE_NAME = 'oauth_state';
 export const OAUTH_STATE_MAX_AGE_SECONDS = 10 * 60; // 600 seconds (10 minutes)
 export const AUTH_REDIRECT_COOKIE_NAME = 'auth_redirect';
 export const AUTH_REDIRECT_MAX_AGE_SECONDS = 10 * 60; // 600 seconds (10 minutes)
-export const DEFAULT_TEST_SECRET = 'test-session-secret-32-chars-long-e2e-suite';
+const DEFAULT_TEST_SECRET = 'test-session-secret-32-chars-long-e2e-suite';
 
 /**
  * Derives a deterministic 32-byte (256-bit) encryption key from secret using SHA-256.

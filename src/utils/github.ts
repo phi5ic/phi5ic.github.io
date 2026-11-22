@@ -16,7 +16,7 @@ export function fromBase64Utf8(b64: string): string {
 }
 
 export function getGitHubConfig() {
-  const baseUrl = process.env.MOCK_GITHUB_URL || process.env.GITHUB_API_URL || 'https://api.github.com';
+  const baseUrl = (process.env.GITHUB_API_URL || process.env.GITHUB_API_BASE_URL || 'https://api.github.com').replace(/\/+$/, '');
   const owner = process.env.GITHUB_REPO_OWNER || 'phi5ic';
   const repo = process.env.GITHUB_REPO_NAME || 'phi5ic.github.io';
   const branch = process.env.GITHUB_BRANCH || 'main';

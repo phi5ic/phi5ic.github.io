@@ -17,7 +17,7 @@ if (session && session.user && isOwner(session.user.login)) {
 const errorParam = Astro.url.searchParams.get('error');
 const logoutParam = Astro.url.searchParams.get('logout');
 
-// Error message dictionary matching test assertion requirements ('error' / 'denied')
+// Error message dictionary for user error display and status messaging
 let errorMessage = '';
 if (errorParam === 'access_denied') {
   errorMessage = 'ACCESS DENIED: Authentication was cancelled or rejected by GitHub.';

@@ -81,7 +81,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
   const defaultMessage = sha ? `Update post: ${frontmatter.title}` : `Add post: ${frontmatter.title}`;
   const message = commitMessage || defaultMessage;
-  const token = locals.accessToken || 'token_owner_valid';
+
+  if (!locals.accessToken) {
+    return new Response(
+      JSON.stringify({ error: 'Unauthorized', message: 'Valid access token required.' }),
+      { status: 401, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+  const token = locals.accessToken;
 
   try {
     const result = await putRepoFile({

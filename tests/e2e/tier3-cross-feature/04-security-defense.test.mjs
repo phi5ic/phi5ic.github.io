@@ -5,7 +5,6 @@ import {
   createTestSessionCookie,
   createTamperedCiphertext,
   createExpiredSessionCookie,
-  decryptSession,
 } from '../helpers/crypto-fixtures.mjs';
 
 test('Tier 3: Pairwise Flow 4 - Multi-Vector Security Defense Chain', async (t) => {
@@ -38,12 +37,12 @@ test('Tier 3: Pairwise Flow 4 - Multi-Vector Security Defense Chain', async (t) 
     assert.equal(res.status, 401);
   });
 
-  await t.test('Defense 4: Directory traversal in slug path is rejected', () => {
-    const isSafeSlug = (slug) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
-    assert.equal(isSafeSlug('../../etc/passwd'), false);
-    assert.equal(isSafeSlug('..\\..\\windows\\system32'), false);
-    assert.equal(isSafeSlug('/etc/shadow'), false);
-    assert.equal(isSafeSlug('valid-kebab-slug'), true);
+  await t.test('Defense 4: Directory traversal in slug path is rejected', { todo: 'Pending M3/M4 slug validation module' }, async () => {
+    client.clearCookies();
+    const valid = createTestSessionCookie();
+    client.setCookie('blog_session', valid);
+    const res = await client.postJson('/api/publish', { slug: '../../etc/passwd', title: 'Traversal Probe' });
+    assert.equal(res.status, 400);
   });
 
   await t.test('Defense 5: Re-authentication with valid owner credentials restores access', { todo: 'Pending M3 /admin route mounting' }, async () => {

@@ -4,7 +4,11 @@ export const prerender = false;
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 
-const user = Astro.locals.user || { login: 'phi5ic' };
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect('/login');
+}
+
 const rawPosts = await getCollection('blog');
 const posts = rawPosts.sort(
   (a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf()
