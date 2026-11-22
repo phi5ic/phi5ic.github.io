@@ -1,0 +1,543 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const user = Astro.locals.user || { login: 'phi5ic' };
+const rawPosts = await getCollection('blog');
+const posts = rawPosts.sort(
+  (a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf()
+);
+---
+
+<BaseLayout title="Sysop Console // Admin Dashboard">
+  <div class="py-6 sm:py-10 max-w-5xl mx-auto font-mono space-y-6">
+    <!-- Top System Header -->
+    <header class="border border-[#ff2a85] bg-[#100613] p-4 sm:p-5 rounded-sm shadow-[0_0_16px_rgba(255,42,133,0.2)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="space-y-1">
+        <div class="text-[11px] text-[#854d80] flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-[#00ff66] animate-pulse"></span>
+          <span>sysop authenticated // node: workstation.local</span>
+        </div>
+        <h1 class="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
+          <span>CONSOLE // POST MANAGEMENT</span>
+          <span class="text-[#ff2a85] text-xs font-normal">[@{user.login}]</span>
+        </h1>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          id="btn-tab-posts"
+          class="px-2.5 py-1 rounded-sm border border-[#ff2a85] bg-[#ff2a85]/20 text-white font-bold text-xs cursor-pointer"
+        >
+          [01] POSTS ARCHIVE ({posts.length})
+        </button>
+        <button
+          type="button"
+          id="btn-tab-editor"
+          class="px-2.5 py-1 rounded-sm border border-[#2a0e2e] text-[#ff2a85] hover:border-[#ff2a85]/50 hover:bg-[#1a081e] text-xs cursor-pointer"
+        >
+          [02] NEW POST EDITOR
+        </button>
+        <form method="POST" action="/api/auth/logout" class="inline">
+          <button
+            type="submit"
+            class="px-2 py-1 rounded-sm border border-[#2a0e2e] text-[#854d80] hover:text-[#ff2a85] hover:border-[#ff2a85]/40 text-xs cursor-pointer"
+            title="Terminate session"
+          >
+            [LOGOUT]
+          </button>
+        </form>
+      </div>
+    </header>
+
+    <!-- Global Status Toast Notification -->
+    <div id="status-toast" class="hidden p-3 rounded-sm text-xs border"></div>
+
+    <!-- TAB 1: Posts Archive / Management List -->
+    <section id="panel-posts" class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#2a0e2e] pb-2">
+        <div class="text-xs text-[#854d80]">
+          Total published posts in <span class="text-white">src/content/blog/</span>: {posts.length}
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <input
+            type="text"
+            id="search-posts"
+            placeholder="Search posts..."
+            class="px-2 py-1 bg-[#0d0410] border border-[#2a0e2e] rounded-xs text-xs text-white focus:border-[#ff2a85] outline-none"
+          />
+        </div>
+      </div>
+
+      <div class="space-y-3" id="post-list-container">
+        {posts.map((post) => {
+          const postSlug = post.id.replace(/\.mdx?$/, '');
+          const formattedDate = new Intl.DateTimeFormat('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+          }).format(new Date(post.data.date));
+
+          return (
+            <div
+              class="post-row border border-[#2a0e2e] bg-[#100613]/80 p-3 sm:p-4 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-[#ff2a85]/40 transition-colors"
+              data-title={post.data.title.toLowerCase()}
+              data-slug={postSlug}
+              data-section={post.data.section || 'systems'}
+            >
+              <div class="space-y-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-[#ff2a85] text-xs font-bold">&gt;</span>
+                  <a href={`/posts/${postSlug}/`} target="_blank" class="text-sm font-bold text-white hover:text-[#ff79c6] no-underline truncate">
+                    {post.data.title}
+                  </a>
+                  {post.data.draft && (
+                    <span class="border border-[#ff2a85] text-[#ff2a85] text-[10px] px-1 rounded-xs">[DRAFT]</span>
+                  )}
+                </div>
+                <div class="text-[11px] text-[#854d80] flex flex-wrap items-center gap-2">
+                  <span>[{formattedDate}]</span>
+                  <span>&bull;</span>
+                  <span class="border border-[#2a0e2e] bg-[#070308] px-1 rounded-xs text-[#ff79c6]">
+                    section: {post.data.section || 'systems'}
+                  </span>
+                  {post.data.categories && post.data.categories.length > 0 && (
+                    <span>categories: {post.data.categories.join(', ')}</span>
+                  )}
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  class="btn-edit-post px-2 py-1 text-xs border border-[#2a0e2e] hover:border-[#ff2a85] text-[#ff2a85] hover:text-white rounded-xs cursor-pointer"
+                  data-post={JSON.stringify({
+                    slug: postSlug,
+                    title: post.data.title,
+                    date: new Date(post.data.date).toISOString().split('T')[0],
+                    section: post.data.section || 'systems',
+                    excerpt: post.data.excerpt,
+                    teaser: post.data.header?.teaser || '',
+                    categories: post.data.categories?.join(', ') || '',
+                    tags: post.data.tags?.join(', ') || '',
+                    use_math: post.data.use_math || false,
+                    draft: post.data.draft || false,
+                    body: post.body || '',
+                  })}
+                >
+                  [EDIT]
+                </button>
+                <a
+                  href={`/posts/${postSlug}/`}
+                  target="_blank"
+                  class="px-2 py-1 text-xs border border-[#2a0e2e] hover:border-[#854d80] text-[#854d80] hover:text-white rounded-xs no-underline"
+                >
+                  [VIEW ↗]
+                </a>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- TAB 2: In-Browser Markdown Editor & Live Preview -->
+    <section id="panel-editor" class="hidden space-y-4">
+      <form id="editor-form" class="space-y-4">
+        <!-- Metadata Header Box -->
+        <div class="border border-[#2a0e2e] bg-[#100613] p-4 rounded-sm space-y-3">
+          <div class="flex items-center justify-between border-b border-[#2a0e2e] pb-2 text-xs">
+            <span class="text-[#ff2a85] font-bold">// POST FRONTMATTER SPECIFICATION</span>
+            <span id="editor-mode-badge" class="text-[11px] text-[#854d80]">[CREATING NEW POST]</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <!-- Title -->
+            <div class="space-y-1">
+              <label class="text-[#854d80]">Title *</label>
+              <input
+                type="text"
+                id="field-title"
+                required
+                placeholder="Post title..."
+                class="w-full px-2.5 py-1.5 bg-[#070308] border border-[#2a0e2e] focus:border-[#ff2a85] text-white rounded-xs outline-none"
+              />
+            </div>
+
+            <!-- Slug -->
+            <div class="space-y-1">
+              <label class="text-[#854d80]">Slug * (URL pathname)</label>
+              <input
+                type="text"
+                id="field-slug"
+                required
+                pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                placeholder="kebab-case-slug"
+                class="w-full px-2.5 py-1.5 bg-[#070308] border border-[#2a0e2e] focus:border-[#ff2a85] text-[#ff79c6] rounded-xs outline-none"
+              />
+            </div>
+
+            <!-- Section -->
+            <div class="space-y-1">
+              <label class="text-[#854d80]">Section *</label>
+              <select
+                id="field-section"
+                required
+                class="w-full px-2.5 py-1.5 bg-[#070308] border border-[#2a0e2e] focus:border-[#ff2a85] text-white rounded-xs outline-none"
+              >
+                <option value="systems">systems (Systems &amp; Projects)</option>
+                <option value="music">music (Music &amp; Interests)</option>
+                <option value="rants">rants (Rants &amp; Hardware)</option>
+              </select>
+            </div>
+
+            <!-- Date -->
+            <div class="space-y-1">
+              <label class="text-[#854d80]">Publish Date *</label>
+              <input
+                type="date"
+                id="field-date"
+                required
+                class="w-full px-2.5 py-1.5 bg-[#070308] border border-[#2a0e2e] focus:border-[#ff2a85] text-white rounded-xs outline-none"
+              />
+            </div>
+          </div>
+
+          <!-- Excerpt -->
+          <div class="space-y-1 text-xs">
+            <label class="text-[#854d80]">Excerpt / Summary *</label>
+            <textarea
+              id="field-excerpt"
+              rows="2"
+              required
+              placeholder="Brief abstract or preview text for cards and feeds..."
+              class="w-full px-2.5 py-1.5 bg-[#070308] border border-[#2a0e2e] focus:border-[#ff2a85] text-white rounded-xs outline-none"
+            ></textarea>
+          </div>
+
+          <!-- Optional taxonomy -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="space-y-1">
+              <label class="text-[#854d80]">Categories (comma-separated)</label>
+              <input
+                type="text"
+                id="field-categories"
+                placeholder="storage, distributed-systems"
+                class="w-full px-2.5 py-1.5 bg-[#070308] border border-[#2a0e2e] focus:border-[#ff2a85] text-white rounded-xs outline-none"
+              />
+            </div>
+            <div class="space-y-1">
+              <label class="text-[#854d80]">Tags (comma-separated)</label>
+              <input
+                type="text"
+                id="field-tags"
+                placeholder="erasure-coding, linux, nifsi"
+                class="w-full px-2.5 py-1.5 bg-[#070308] border border-[#2a0e2e] focus:border-[#ff2a85] text-white rounded-xs outline-none"
+              />
+            </div>
+          </div>
+
+          <!-- Flags -->
+          <div class="flex flex-wrap items-center gap-6 pt-1 text-xs">
+            <label class="flex items-center gap-2 cursor-pointer text-[#ecd2e8]">
+              <input type="checkbox" id="field-math" checked class="accent-[#ff2a85]" />
+              <span>Enable KaTeX Math (`$..$` and `$$..$$`)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-[#ecd2e8]">
+              <input type="checkbox" id="field-draft" class="accent-[#ff2a85]" />
+              <span>Save as Draft</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Editor Toolbar & Metrics -->
+        <div class="flex flex-wrap items-center justify-between gap-3 text-xs border-b border-[#2a0e2e] pb-2">
+          <div class="flex items-center gap-4 text-[#854d80]">
+            <span>Words: <strong id="metric-words" class="text-white">0</strong></span>
+            <span>&bull;</span>
+            <span>Read time: <strong id="metric-time" class="text-white">1 min</strong></span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              id="btn-toggle-view"
+              class="px-2 py-0.5 border border-[#2a0e2e] hover:border-[#ff2a85] text-[#ff2a85] rounded-xs cursor-pointer"
+            >
+              [SPLIT / PREVIEW VIEW]
+            </button>
+          </div>
+        </div>
+
+        <!-- Split Workspace: Markdown Input + Live Preview -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-[420px]" id="editor-workspace">
+          <!-- Textarea Input Pane -->
+          <div class="flex flex-col space-y-1">
+            <div class="text-[11px] text-[#854d80] flex items-center justify-between">
+              <span>// MARKDOWN BUFFER</span>
+              <span class="text-[10px]">UTF-8</span>
+            </div>
+            <textarea
+              id="field-body"
+              rows="18"
+              placeholder="# Write your post in markdown here...&#10;&#10;Supports headings, code blocks, lists, and KaTeX math:&#10;$$\sum_{i=1}^k \alpha_i \cdot \beta_i = \Omega(N)$$"
+              class="w-full flex-1 p-3 bg-[#070308] border border-[#2a0e2e] focus:border-[#ff2a85] text-white font-mono text-xs rounded-xs outline-none resize-y leading-relaxed"
+            ></textarea>
+          </div>
+
+          <!-- Live Preview Pane -->
+          <div class="flex flex-col space-y-1">
+            <div class="text-[11px] text-[#854d80] flex items-center justify-between">
+              <span>// COMPILED PREVIEW</span>
+              <span class="text-[#ff2a85] text-[10px]">[LIVE]</span>
+            </div>
+            <div
+              id="preview-pane"
+              class="w-full flex-1 p-3 bg-[#0d0410] border border-[#2a0e2e] rounded-xs overflow-y-auto prose-minimal max-h-[500px]"
+            >
+              <p class="text-[#854d80] text-xs">// Live preview will render here...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Publish Action Footer -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-[#2a0e2e]">
+          <button
+            type="button"
+            id="btn-cancel-edit"
+            class="px-3 py-1.5 border border-[#2a0e2e] hover:border-[#ff2a85] text-[#854d80] hover:text-white rounded-xs text-xs cursor-pointer"
+          >
+            [CANCEL / RESET]
+          </button>
+
+          <button
+            type="submit"
+            id="btn-publish"
+            class="px-4 py-2 border border-[#ff2a85] bg-[#ff2a85]/20 hover:bg-[#ff2a85]/30 text-white font-bold rounded-sm shadow-[0_0_12px_rgba(255,42,133,0.3)] transition-all cursor-pointer text-xs"
+          >
+            [✓ PUBLISH &amp; COMMIT DIRECTLY TO GITHUB]
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script is:inline>
+    document.addEventListener('astro:page-load', () => {
+      // Tab Navigation Elements
+      const btnTabPosts = document.getElementById('btn-tab-posts');
+      const btnTabEditor = document.getElementById('btn-tab-editor');
+      const panelPosts = document.getElementById('panel-posts');
+      const panelEditor = document.getElementById('panel-editor');
+
+      // Form Elements
+      const editorForm = document.getElementById('editor-form');
+      const titleInput = document.getElementById('field-title');
+      const slugInput = document.getElementById('field-slug');
+      const sectionInput = document.getElementById('field-section');
+      const dateInput = document.getElementById('field-date');
+      const excerptInput = document.getElementById('field-excerpt');
+      const categoriesInput = document.getElementById('field-categories');
+      const tagsInput = document.getElementById('field-tags');
+      const mathCheckbox = document.getElementById('field-math');
+      const draftCheckbox = document.getElementById('field-draft');
+      const bodyInput = document.getElementById('field-body');
+
+      const previewPane = document.getElementById('preview-pane');
+      const metricWords = document.getElementById('metric-words');
+      const metricTime = document.getElementById('metric-time');
+      const statusToast = document.getElementById('status-toast');
+      const editorModeBadge = document.getElementById('editor-mode-badge');
+      const searchInput = document.getElementById('search-posts');
+
+      let currentEditingSha = null;
+      let manualSlugEdited = false;
+
+      // Set default date to today
+      if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+      }
+
+      // Switch to Archive Tab
+      function showPostsTab() {
+        panelPosts.classList.remove('hidden');
+        panelEditor.classList.add('hidden');
+        btnTabPosts.classList.remove('border-[#2a0e2e]', 'text-[#ff2a85]');
+        btnTabPosts.classList.add('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
+        btnTabEditor.classList.remove('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
+        btnTabEditor.classList.add('border-[#2a0e2e]', 'text-[#ff2a85]');
+      }
+
+      // Switch to Editor Tab
+      function showEditorTab(modeText = '[CREATING NEW POST]') {
+        panelEditor.classList.remove('hidden');
+        panelPosts.classList.add('hidden');
+        btnTabEditor.classList.remove('border-[#2a0e2e]', 'text-[#ff2a85]');
+        btnTabEditor.classList.add('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
+        btnTabPosts.classList.remove('border-[#ff2a85]', 'bg-[#ff2a85]/20', 'text-white', 'font-bold');
+        btnTabPosts.classList.add('border-[#2a0e2e]', 'text-[#ff2a85]');
+        if (editorModeBadge) editorModeBadge.textContent = modeText;
+      }
+
+      if (btnTabPosts) btnTabPosts.onclick = showPostsTab;
+      if (btnTabEditor) {
+        btnTabEditor.onclick = () => {
+          resetEditor();
+          showEditorTab();
+        };
+      }
+
+      // Reset editor
+      function resetEditor() {
+        currentEditingSha = null;
+        manualSlugEdited = false;
+        editorForm.reset();
+        dateInput.value = new Date().toISOString().split('T')[0];
+        updatePreview();
+      }
+
+      // Slug Auto-Derivation
+      function deriveSlug(text) {
+        return text
+          .toLowerCase()
+          .trim()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/[\s_-]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      }
+
+      if (titleInput && slugInput) {
+        titleInput.addEventListener('input', () => {
+          if (!manualSlugEdited) {
+            slugInput.value = deriveSlug(titleInput.value);
+          }
+        });
+        slugInput.addEventListener('input', () => {
+          manualSlugEdited = true;
+        });
+      }
+
+      // Live Preview & Word Count
+      function updatePreview() {
+        const text = bodyInput.value || '';
+        const words = text.trim().split(/\s+/).filter(Boolean);
+        const count = words.length;
+        const readTime = Math.max(1, Math.round(count / 200));
+
+        if (metricWords) metricWords.textContent = count;
+        if (metricTime) metricTime.textContent = `${readTime} min`;
+
+        if (previewPane) {
+          // Basic preview with bold, code, headings, lists
+          let html = text
+            .replace(/^### (.*$)/gim, '<h3 class="text-white text-base font-bold my-2">$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2 class="text-white text-lg font-bold my-3 border-b border-[#2a0e2e] pb-1">$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1 class="text-white text-xl font-bold my-4 text-[#ff2a85]">$1</h1>')
+            .replace(/\*\*(.*)\*\*/gim, '<strong class="text-white">$1</strong>')
+            .replace(/`([^`]+)`/gim, '<code class="bg-[#100613] text-[#ff79c6] px-1 py-0.5 rounded-xs">$1</code>')
+            .replace(/\n\n/gim, '</p><p class="my-2 leading-relaxed">');
+
+          previewPane.innerHTML = `<p class="my-2 leading-relaxed">${html}</p>`;
+        }
+      }
+
+      if (bodyInput) {
+        bodyInput.addEventListener('input', updatePreview);
+      }
+
+      // Search Filter
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          const q = searchInput.value.toLowerCase().trim();
+          document.querySelectorAll('.post-row').forEach((row) => {
+            const title = row.getAttribute('data-title') || '';
+            const slug = row.getAttribute('data-slug') || '';
+            const section = row.getAttribute('data-section') || '';
+            if (!q || title.includes(q) || slug.includes(q) || section.includes(q)) {
+              row.style.display = 'flex';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        });
+      }
+
+      // Edit Post Button Clicks
+      document.querySelectorAll('.btn-edit-post').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const postData = JSON.parse(btn.getAttribute('data-post'));
+          titleInput.value = postData.title;
+          slugInput.value = postData.slug;
+          sectionInput.value = postData.section;
+          dateInput.value = postData.date;
+          excerptInput.value = postData.excerpt;
+          categoriesInput.value = postData.categories;
+          tagsInput.value = postData.tags;
+          mathCheckbox.checked = postData.use_math;
+          draftCheckbox.checked = postData.draft;
+          bodyInput.value = postData.body;
+
+          manualSlugEdited = true;
+          showEditorTab(`[EDITING: ${postData.slug}]`);
+          updatePreview();
+        });
+      });
+
+      // Submit / Publish Flow
+      if (editorForm) {
+        editorForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btnPublish = document.getElementById('btn-publish');
+          btnPublish.disabled = true;
+          btnPublish.textContent = '[ COMMITTING TO GITHUB... ]';
+
+          const payload = {
+            slug: slugInput.value.trim(),
+            frontmatter: {
+              title: titleInput.value.trim(),
+              date: dateInput.value,
+              section: sectionInput.value,
+              excerpt: excerptInput.value.trim(),
+              categories: categoriesInput.value.split(',').map((s) => s.trim()).filter(Boolean),
+              tags: tagsInput.value.split(',').map((s) => s.trim()).filter(Boolean),
+              use_math: mathCheckbox.checked,
+              draft: draftCheckbox.checked,
+            },
+            body: bodyInput.value,
+            sha: currentEditingSha,
+          };
+
+          try {
+            const res = await fetch('/api/publish', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+              statusToast.className = 'p-3 rounded-sm text-xs border border-[#00ff66] bg-[#00ff66]/15 text-[#00ff66] shadow-[0_0_12px_rgba(0,255,102,0.3)]';
+              statusToast.innerHTML = `✓ POST PUBLISHED: Successfully committed to main branch! Commit SHA: <code>${data.commit?.sha?.slice(0, 7) || 'HEAD'}</code>. Automated CI/CD will deploy changes to gh-pages momentarily.`;
+              statusToast.classList.remove('hidden');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+              statusToast.className = 'p-3 rounded-sm text-xs border border-[#ff2a85] bg-[#ff2a85]/15 text-[#ff79c6] shadow-[0_0_12px_rgba(255,42,133,0.3)]';
+              statusToast.innerHTML = `! PUBLISH ERROR: ${data.message || data.error || 'Failed to commit post.'}`;
+              statusToast.classList.remove('hidden');
+            }
+          } catch (err) {
+            statusToast.className = 'p-3 rounded-sm text-xs border border-[#ff2a85] bg-[#ff2a85]/15 text-[#ff79c6]';
+            statusToast.innerHTML = `! NETWORK ERROR: ${err.message}`;
+            statusToast.classList.remove('hidden');
+          } finally {
+            btnPublish.disabled = false;
+            btnPublish.textContent = '[✓ PUBLISH & COMMIT DIRECTLY TO GITHUB]';
+          }
+        });
+      }
+    });
+  </script>
+</BaseLayout>

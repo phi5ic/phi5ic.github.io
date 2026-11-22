@@ -1,4 +1,5 @@
 import { defineConfig } from 'astro/config';
+import node from '@astrojs/node';
 import tailwindcss from '@tailwindcss/vite';
 import { unified } from '@astrojs/markdown-remark';
 import remarkMath from 'remark-math';
@@ -7,6 +8,8 @@ import rehypeKatex from 'rehype-katex';
 export default defineConfig({
   site: 'https://phi5ic.github.io',
   trailingSlash: 'always',
+  output: 'static',
+  adapter: node({ mode: 'standalone' }),
   build: {
     assets: 'chunks',
   },

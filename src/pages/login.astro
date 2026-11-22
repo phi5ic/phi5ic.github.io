@@ -1,0 +1,131 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSessionFromCookie, isOwner, sanitizeRedirect } from '../utils/auth';
+
+// 1. Check if session already active; if owner, redirect to /admin or sanitized redirect
+const session = await getSessionFromCookie(Astro.cookies);
+const rawRedirect = Astro.url.searchParams.get('redirect') || Astro.url.searchParams.get('next');
+const safeRedirect = sanitizeRedirect(rawRedirect, '/admin');
+
+if (session && session.user && isOwner(session.user.login)) {
+  return Astro.redirect(safeRedirect);
+}
+
+// 2. Query parameter extraction
+const errorParam = Astro.url.searchParams.get('error');
+const logoutParam = Astro.url.searchParams.get('logout');
+
+// Error message dictionary matching test assertion requirements ('error' / 'denied')
+let errorMessage = '';
+if (errorParam === 'access_denied') {
+  errorMessage = 'ACCESS DENIED: Authentication was cancelled or rejected by GitHub.';
+} else if (errorParam === 'unauthorized_user') {
+  errorMessage = 'ACCESS DENIED: Account verification failed. Access is strictly restricted to site owner @phi5ic. Upstream OAuth token proactively revoked.';
+} else if (errorParam === 'session_expired') {
+  errorMessage = 'SESSION ERROR: Your session has expired. Please re-authenticate.';
+} else if (errorParam === 'csrf_mismatch') {
+  errorMessage = 'SECURITY ERROR: State parameter mismatch (CSRF protection). Authentication aborted.';
+} else if (errorParam) {
+  errorMessage = `AUTHENTICATION ERROR: ${errorParam}`;
+}
+
+const isLogoutSuccess = logoutParam === 'success';
+
+// 3. Construct OAuth initiation URL with sanitized redirect
+const loginUrl = rawRedirect
+  ? `/api/auth/login?redirect=${encodeURIComponent(safeRedirect)}`
+  : '/api/auth/login';
+---
+
+<BaseLayout title="Login // Sysop Terminal">
+  <div class="py-8 sm:py-16 max-w-xl mx-auto font-mono">
+    <!-- Cyber Terminal Box -->
+    <div class="border border-[#ff2a85] bg-[#100613] rounded-sm p-6 sm:p-8 shadow-[0_0_16px_rgba(255,42,133,0.25)] relative">
+      <!-- Terminal Header / Titlebar -->
+      <div class="flex items-center justify-between border-b border-[#2a0e2e] pb-3 mb-6 text-xs">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#ff2a85] animate-pulse"></span>
+          <span class="text-white font-bold tracking-wider">sys://auth/login.gateway</span>
+        </div>
+        <span class="text-[#854d80] text-[11px]">[RESTRICTED]</span>
+      </div>
+
+      <!-- Shell Prompt Simulation -->
+      <div class="space-y-1.5 text-xs mb-6">
+        <div class="text-[#854d80]">phi5ic@mesh ~ $ auth --terminal --owner-only</div>
+        <div class="text-white font-bold text-sm sm:text-base pt-1">
+          SYSOP AUTHENTICATION GATEWAY
+        </div>
+        <p class="text-[#c9a6c5] text-xs leading-relaxed">
+          Owner-only management console for <span class="text-[#ff2a85]">phi5ic.github.io</span>. Authorized credentials require GitHub OAuth identity verification.
+        </p>
+      </div>
+
+      <!-- Error Banner (if error query param present) -->
+      {errorMessage && (
+        <div class="mb-6 p-3 border border-[#ff2a85] bg-[#ff2a85]/15 text-[#ff79c6] text-xs rounded-xs flex items-start gap-2 shadow-[0_0_8px_rgba(255,42,133,0.3)]">
+          <span class="text-[#ff2a85] font-bold">[!]</span>
+          <span class="leading-relaxed">{errorMessage}</span>
+        </div>
+      )}
+
+      <!-- Logout Success Banner -->
+      {isLogoutSuccess && (
+        <div class="mb-6 p-3 border border-[#00ff66] bg-[#00ff66]/15 text-[#00ff66] text-xs rounded-xs flex items-start gap-2 shadow-[0_0_8px_rgba(0,255,102,0.2)]">
+          <span class="font-bold">[✓]</span>
+          <span class="leading-relaxed">SESSION TERMINATED: You have been logged out successfully and upstream tokens revoked.</span>
+        </div>
+      )}
+
+      <!-- Primary Authenticate Action -->
+      <div class="space-y-4 pt-2">
+        <a
+          href={loginUrl}
+          data-astro-reload
+          class="w-full flex items-center justify-center gap-3 py-3 px-4 border border-[#ff2a85] bg-[#ff2a85]/20 hover:bg-[#ff2a85]/30 text-white hover:text-white font-bold text-xs sm:text-sm tracking-wider rounded-sm shadow-[0_0_12px_rgba(255,42,133,0.35)] transition-all no-underline text-center group cursor-pointer"
+        >
+          <svg class="w-4 h-4 text-[#ff2a85] group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+          </svg>
+          <span>[ AUTHENTICATE VIA GITHUB ]</span>
+          <span class="text-[#ff79c6] group-hover:translate-x-1 transition-transform">&rarr;</span>
+        </a>
+
+        {rawRedirect && (
+          <div class="text-[11px] text-[#854d80] text-center">
+            Target redirect: <span class="text-[#c9a6c5]">{safeRedirect}</span>
+          </div>
+        )}
+      </div>
+
+      <!-- Security Telemetry Block -->
+      <div class="mt-8 pt-4 border-t border-[#2a0e2e] text-[11px] text-[#854d80] space-y-1">
+        <div class="flex justify-between">
+          <span>Target Host:</span>
+          <span class="text-[#c9a6c5]">phi5ic.github.io</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Authorized Principal:</span>
+          <span class="text-[#ff2a85]">phi5ic</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Protocol:</span>
+          <span class="text-[#c9a6c5]">GitHub OAuth 2.0 (repo, read:user)</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Session Encryption:</span>
+          <span class="text-[#c9a6c5]">AES-256-GCM / 7-Day TTL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terminal Return Link -->
+    <div class="pt-6 text-center">
+      <a href="/" class="text-xs text-[#854d80] hover:text-[#ff79c6] no-underline">
+        &larr; [return to /]
+      </a>
+    </div>
+  </div>
+</BaseLayout>

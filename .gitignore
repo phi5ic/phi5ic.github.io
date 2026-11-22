@@ -16,3 +16,9 @@ bin/
 .DS_Store
 *.log
 .gh-pages-deploy/
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
